@@ -1,4 +1,5 @@
 #!/bin/bash
+# Thanks to benkulbertis https://gist.github.com/benkulbertis/fff10759c2391b6618dd/
 
 while [[ $# -gt 1 ]]
 do
