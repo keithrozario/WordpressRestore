@@ -20,11 +20,24 @@ Automated script to backup wordpress daily or restore from backup
 
 <h3>restoreWP.sh</h3>
 <ul>
-<li><b>--dbrootpass</b> [database_root_password]<br>
+<li><b>--dbrootpass</b> DATABASE_ROOT_PASSWORD<br>
 The password for root on the database you're about to create, this can be set to anything, but use strong passwords <br>
-<li><b>--dbname</b> [database_name] <br>
-The database name for storing wordpress <br>
-<li><b>--wpdbuser</b> [database_wordpress_user] <br>
-The database user assigned to wordpress, refer to wp-config.php <br>
-<li><b>--wpdbpass</b> [database_wordpress_user_password] <br>
+<li><b>--dbname</b> DATABASE_NAME <br>
+The database name for storing wordpress, refer to wp-config (DB_NAME) <br>
+<li><b>--wpdbuser</b> WORDPRESS_DATABASE_USER <br>
+The database user assigned to wordpress, refer to wp-config.php (DB_USER)<br>
+<li><b>--wpdbpass</b> WORDPRESS_DATABASE_USER_PASSWORD <br>
+The password for the database user assigned to wordpress, refer to wp-config.php (DB_PASSWORD) <br>
+<li><b>--dropboxtoken</b> DROPBOX_ACCESS_TOKEN <br>
+THe access token for your dropbox account, refer to http://bit.ly/2it95it to get one<br>
+<li><b>--wpconfpass</b> ENCRYPTION_KEY_FOR_WPCONFIG <br>
+A randomly generated encryption key to encrypt the wordpress wp-config.php file<br>
+<li><b>--cfemail</b> CLOUDFLARE_EMAIL_ADDRESS <br>
+OPTIONAL: Email Address for your cloudflare account <br>
+<li><b>--cfzone</b> CLOUDFLARE_URL_ZONE <br>
+OPTIONAL: Cloudflare zone (e.g. keithrozario.com)
+<li><b>--cfrecord</b> CLOUDFLARE_RECORD <br>
+OPTIONAL: Cloudflare record to update (e.g. www.keithrozario.com)
+<li><b>--cfkey</b> CLOUDFLARE_ACCESS_TOKEN <br>
+OPTIONAL: Cloudflare access token
 </ul>
