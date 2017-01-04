@@ -13,7 +13,9 @@
 #
 # 
 
-#Get the command-line arguments
+#---------------------------------------------------------------------------------------
+# Command line parameters
+#---------------------------------------------------------------------------------------
 
 while [[ $# -gt 1 ]]
 do
@@ -70,29 +72,28 @@ esac
 shift # past argument or value
 done
 
-#check if mandatory parameters are supplied
-if [ -z "$DBPASS" ] || [ -z "$DBNAME" ]; 
+if [ -z "$DBPASS" ] || [ -z "$DBNAME" ];  #Check DB Parameters
 then echo "Please provide all Database Parameters: --dbpass, --dbname ";
 exit 0
 else
 echo "Database parameteres : Good"
 fi
 
-if [ -z "$WPDBUSER" ] || [ -z "$WPDBPASS" ] || [ -z "$WPCONFPASS" ]; 
+if [ -z "$WPDBUSER" ] || [ -z "$WPDBPASS" ] || [ -z "$WPCONFPASS" ]; #Check Wordpress Parameters
 then echo "Unable to proceed, insufficient wordpress parameters: --wpdbuser, --wpdbpass & --wpconfpass. Check your wp-config.php file"; 
 exit 0
 else
 echo "Wordpress parameteres : Good"
 fi
 
-if [ -z "$DROPBOXTOKEN" ]; 
+if [ -z "$DROPBOXTOKEN" ]; #Check for Dropboxtoken
 then echo "Please provide the Dropbox Token, refer to http://bit.ly/2it95it to get one"
 exit 0
 else
 echo "Dropbox parameteres : Good"
 fi
 
-if [ -z "$CFEMAIL" ] || [ -z "$CFKEY" ] || [ -z "$CFZONE" ] || [ -z "$CFRECORD" ];
+if [ -z "$CFEMAIL" ] || [ -z "$CFKEY" ] || [ -z "$CFZONE" ] || [ -z "$CFRECORD" ]; #Check for Dropboxtoken
 then echo "Insufficient Cloudflare parameters, DNS record will not be updated"
 DNSUPDATE=false
 else
@@ -100,9 +101,9 @@ echo "Cloudflare Parameters : Good"
 DNSUPDATE=true
 fi
 
-echo "DNSUPDATE = $DNSUPDATE"
-
-####Filenames##########################################################
+#---------------------------------------------------------------------------------------
+# Global Constants
+#---------------------------------------------------------------------------------------
 PRODUCTIONCERT=false
 
 WPSQLFILE=wordpress.sql
@@ -110,47 +111,60 @@ WPZIPFILE=wordpress.tgz
 WPCONFIGFILEENC=wp-config.php.enc
 APACHECONFIG=apachecfg_static.tar
 
-URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git"
-URLBACKUPSHELLSCRIPT="https://www.dropbox.com/s/0z3erarvfhaq8gy/Backup.sh"
+URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
+URLBACKUPSHELLSCRIPT="https://www.dropbox.com/s/0z3erarvfhaq8gy/Backup.sh" 
 URLCLOUDFLARESHELLSCRIPT="https://www.dropbox.com/s/l713o9dq5fq00cn/cloudflare.sh"
-####Filenames##########################################################
 
-#Apt-get Update (best practice :))
-sudo apt-get update
+#---------------------------------------------------------------------------------------
+# Main-Initilization
+#---------------------------------------------------------------------------------------
 
-#Silence all interactions
-export DEBIAN_FRONTEND=noninteractive
+sudo apt-get update 
+export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
+#---------------------------------------------------------------------------------------
+# DNS Update with Cloudflare
+#---------------------------------------------------------------------------------------
 
-####Download Files from Dropbox#########################################
+if [ "$DNSUPDATE" = true ]; then
 
+	echo "Getting Cloudflare script from $URLCLOUDFLARESHELLSCRIPT"
+	wget $URLCLOUDFLARESHELLSCRIPT
+	chmod +x /cloudflare.sh
+	echo "Updating cloudflare record $CFRECORD in zone $CFZONE using credentials $CFEMAIL , $CFKEY "
+	./cloudflare.sh --email $CFEMAIL --key $CFKEY --zone $CFZONE --record $CFRECORD
+	echo "Removing Cloudflare script"
+	rm cloudflare.sh
+	
+else
 
-#Setup Dropbox Uploader
-#Special Thanks to AndreaFabrizi
-sudo apt-get -y install git
+	echo "WARNING: DNS wasn't updated"
+	
+fi
+
+#---------------------------------------------------------------------------------------
+# Download backup files from dropbox
+# Special Thanks to AndreaFabrizi https://github.com/andreafabrizi
+#---------------------------------------------------------------------------------------
+
 echo "Saving Token : $DROPBOXTOKEN to file"
 echo "OAUTH_ACCESS_TOKEN=$DROPBOXTOKEN" > ~/.dropbox_uploader
 echo "Downloading DropboxDownloader from $URLDROPBOXDOWNLOADER"
 git clone $URLDROPBOXDOWNLOADER /var/Dropbox-Uploader
 chmod +x /var/Dropbox-Uploader/dropbox_uploader.sh
 
-#Download Files from Dropbox
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILEENC
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE #Wordpress.sql file
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE #zip file with all wordpress contents
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG #Apache configurations
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILEENC #encrypted Wp-config.php file
 	
-####End Dropbox Download###############################################
+#---------------------------------------------------------------------------------------
+# Install MySQL and Dependencies
+#---------------------------------------------------------------------------------------
 
+sudo -E apt-get -q -y install mysql-server #non-interactive mysql installation
 
-
-####MYSQL Setup######################################################
-
-
-#Install mysql
-sudo -E apt-get -q -y install mysql-server
-
-#Some security cleaning up on mysql
+#Some security cleaning up on mysql-----------------------------------------------------
 mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
 echo "Setting password for root user to $DBPASS"
 mysql -u root -e "UPDATE mysql.user SET authentication_string=PASSWORD('$DBPASS') WHERE User='root';"
@@ -159,110 +173,71 @@ mysql -u root -e "DROP DATABASE IF EXISTS test;"
 mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
 mysql -u root -e "FLUSH PRIVILEGES;"
 
-#Create DB for Wordpress with user
+#Create DB for Wordpress with user------------------------------------------------------
 echo "Creating Database with name $DBNAME"
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DBNAME;"
 echo "Granting Permission to $WPDBUSER with password: $WPDBPASS"
 mysql -u root -e "GRANT ALL ON *.* TO '$WPDBUSER'@'localhost' IDENTIFIED BY '$WPDBPASS';"
 mysql -u root -e "FLUSH PRIVILEGES;"
 
-#Setup permission for my.cnf properly (defaults to 777)
+#Setup permission for my.cnf propery----------------------------------------------------
 chmod 644 /etc/mysql/my.cnf
 
-#Extract mysqlfiles
-mysql wordpress < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS
-rm $WPSQLFILE
+#Extract mysqlfiles---------------------------------------------------------------------
+mysql wordpress < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
 
-####END MYSQL Setup################################################
+#---------------------------------------------------------------------------------------
+# Apache Setup and Depdencies
+#---------------------------------------------------------------------------------------
 
+sudo apt-get -y install apache2 #non-interactive apache2 install
 
-
-####APACHE2 Setup##################################################
-
-#Setup Apache#
-sudo apt-get -y install apache2
-
-#Extract and Setup Apache
-tar xvf $APACHECONFIG
+tar xvf $APACHECONFIG #extract apache2 configuration as downloaded
 sudo service apache2 restart
-rm $APACHECONFIG
 
-####END APACHE2 Setup##############################################
-
-
-
-####WORDPRESS & PHP Setup##########################################
-#Install all other depedencies (PHP and GIT)
+#---------------------------------------------------------------------------------------
+# Wordpress and PHP setup
+#---------------------------------------------------------------------------------------
 
 sudo apt-get -y install php 
 sudo apt-get -y install libapache2-mod-php
 sudo apt-get -y install php-mcrypt
 sudo apt-get -y install php-mysql
 
-
-#Extract Wordpress files/
-rm -r /var/www
+rm -r /var/www #remove current directory (to avoid conflicts)
 tar xzf $WPZIPFILE
 rm $WPZIPFILE
 
-#decrypt wp-config.php
-openssl enc -aes-256-cbc -d -in $WPCONFIGFILEENC -out /var/wp-config.php -k $WPCONFPASS
+#Decrypt and extract wp-config.php file-------------------------------------------------
+openssl enc -aes-256-cbc -d -in $WPCONFIGFILEENC -out /var/wp-config.php -k $WPCONFPASS 
 rm $WPCONFIGFILEENC
-#store wpconfigpass in config file
-echo "WPCONFPASS=$WPCONFPASS" > ~/.wpconfpass
+echo "WPCONFPASS=$WPCONFPASS" > ~/.wpconfpass #store wpconfigpass in config file
 
-#restart apache for php to take effect
-sudo service apache2 restart
+sudo service apache2 restart #restart apache for php to take effect
 
-####END WORDPRESS & PHP Setup####################################
-
-
-
-#######Download Backup Script####################################
-#download backup-script
+#---------------------------------------------------------------------------------------
+# Download backup script
+#---------------------------------------------------------------------------------------
 wget $URLBACKUPSHELLSCRIPT
 mv Backup.sh /var
 chmod +x /var/Backup.sh
-
-#cron-job the backup-script
-( crontab -l ; echo "0 23 * * * /var/Backup.sh" ) | crontab -
-#######END Download Backup Script################################
+( crontab -l ; echo "0 23 * * * /var/Backup.sh" ) | crontab - #cron-job the backup-script
 
 
-
-####DNS Update for Cloudflare AND LetsEncrypt####################################
-if [ "$DNSUPDATE" = true ]; then
-
-####DNS##########################################################
-#Update cloudflare API to point to new address
-echo "Getting Cloudflare script from $URLCLOUDFLARESHELLSCRIPT"
-wget $URLCLOUDFLARESHELLSCRIPT
-chmod +x /cloudflare.sh
-echo "Updating cloudflare record $CFRECORD in zone $CFZONE using credentials $CFEMAIL , $CFKEY "
-./cloudflare.sh --email $CFEMAIL --key $CFKEY --zone $CFZONE --record $CFRECORD
-echo "Removing Cloudflare script"
-rm cloudflare.sh
-
-####END DNS######################################################
-
-#add let's encrypt cron jobs before hand (leaving the user entry for the end)
+#---------------------------------------------------------------------------------------
+# Lets encrypt
+#---------------------------------------------------------------------------------------
 ( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
 ( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
 
-#Install Lets Encrypts and get a new Cert
-sudo apt-get -y install python-letsencrypt-apache 
+sudo apt-get -y install python-letsencrypt-apache #silent installation of letsencrypt
 
 if [ "$PRODUCTIONCERT" = true ] ; then 
-echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
-letsencrypt --apache 
+	echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
+	letsencrypt --apache 
 else
-echo "Obtaining staging certs (for test)"
-letsencrypt --apache --staging
+	echo "Obtaining staging certs (for test)"
+	letsencrypt --apache --staging
 fi
-####DNS and Lets Encrypt#########################################
 
-else
-echo "DNS wasn't updated, certs can't be obtained if DNS isn't updated"
-fi
-####DNS Update for Cloudflare AND LetsEncrypt####################################
 
