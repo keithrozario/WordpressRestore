@@ -33,11 +33,11 @@ THe access token for your dropbox account, refer to http://bit.ly/2it95it to get
 <li><b>--wpconfpass</b> ENCRYPTION_KEY_FOR_WPCONFIG <br>
 A randomly generated encryption key to encrypt the wordpress wp-config.php file<br>
 <li><b>--cfemail</b> CLOUDFLARE_EMAIL_ADDRESS <br>
-<i>OPTIONAL:</i> Email Address for your cloudflare account <br>
+<i>Optional:</i> Email Address for your cloudflare account <br>
 <li><b>--cfzone</b> CLOUDFLARE_URL_ZONE <br>
-<i>OPTIONAL:</i> Cloudflare zone (e.g. keithrozario.com)
+<i>Optional:</i> Cloudflare zone (e.g. keithrozario.com)
 <li><b>--cfrecord</b> CLOUDFLARE_RECORD <br>
-<i>OPTIONAL:</i> Cloudflare record to update (e.g. www.keithrozario.com)
+<i>Optional:</i> Cloudflare record to update (e.g. www.keithrozario.com)
 <li><b>--cfkey</b> CLOUDFLARE_ACCESS_TOKEN <br>
-<i>OPTIONAL:</i> Cloudflare access token, refer to http://bit.ly/2hTadAg to get one<br>
+<i>Optional:</i> Cloudflare access token, refer to http://bit.ly/2hTadAg to get one<br>
 </ul>
