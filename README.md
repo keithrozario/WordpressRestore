@@ -5,7 +5,7 @@ Automated script to backup wordpress daily or restore from backup
 
 1. Wordpress site (to backup and restore)<br>
 2. Dropbox account (to save backups and restore from)<br>
-3. Cloudflare account (to update DNS record after restoration)<br>
+3. Optional Cloudflare account (with token key) if you wish to update DNS<br>
 4. Root access to box you wish to restore to (or backup from)<br>
 
 <h2>Assumptions</h2>
@@ -33,11 +33,11 @@ THe access token for your dropbox account, refer to http://bit.ly/2it95it to get
 <li><b>--wpconfpass</b> ENCRYPTION_KEY_FOR_WPCONFIG <br>
 A randomly generated encryption key to encrypt the wordpress wp-config.php file<br>
 <li><b>--cfemail</b> CLOUDFLARE_EMAIL_ADDRESS <br>
-OPTIONAL: Email Address for your cloudflare account <br>
+<i>OPTIONAL:</i> Email Address for your cloudflare account <br>
 <li><b>--cfzone</b> CLOUDFLARE_URL_ZONE <br>
-OPTIONAL: Cloudflare zone (e.g. keithrozario.com)
+<i>OPTIONAL:</i> Cloudflare zone (e.g. keithrozario.com)
 <li><b>--cfrecord</b> CLOUDFLARE_RECORD <br>
-OPTIONAL: Cloudflare record to update (e.g. www.keithrozario.com)
+<i>OPTIONAL:</i> Cloudflare record to update (e.g. www.keithrozario.com)
 <li><b>--cfkey</b> CLOUDFLARE_ACCESS_TOKEN <br>
-OPTIONAL: Cloudflare access token
+<i>OPTIONAL:</i> Cloudflare access token, refer to http://bit.ly/2hTadAg to get one<br>
 </ul>
