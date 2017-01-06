@@ -73,7 +73,8 @@ if [[ $update == *"\"success\":false"* ]]; then
     exit 1 
 else
     message="IP changed to: $ip"
-    echo "$ip" > $ip_file
-    log "$message"
     echo "$message"
+    rm $ip_file
+    rm $id_file
+    rm $log_file #remove all the unnecessary files
 fi
