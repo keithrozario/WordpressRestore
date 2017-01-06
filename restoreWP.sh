@@ -114,14 +114,7 @@ APACHECONFIG=apachecfg_static.tar
 URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
 
 #---------------------------------------------------------------------------------------
-# Main-Initilization
-#---------------------------------------------------------------------------------------
-
-sudo apt-get update 
-export DEBIAN_FRONTEND=noninteractive #Silence all interactions
-
-#---------------------------------------------------------------------------------------
-# DNS Update with Cloudflare
+# DNS Update with Cloudflare - (done first because it takes time to propagate)
 #---------------------------------------------------------------------------------------
 
 if [ "$DNSUPDATE" = true ]; then
@@ -137,6 +130,15 @@ else
 	echo "WARNING: DNS wasn't updated"
 	
 fi
+
+#---------------------------------------------------------------------------------------
+# Main-Initilization
+#---------------------------------------------------------------------------------------
+
+sudo apt-get update 
+export DEBIAN_FRONTEND=noninteractive #Silence all interactions
+
+
 
 #---------------------------------------------------------------------------------------
 # Download backup files from dropbox
