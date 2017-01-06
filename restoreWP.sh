@@ -112,8 +112,8 @@ WPCONFIGFILEENC=wp-config.php.enc
 APACHECONFIG=apachecfg_static.tar
 
 URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
-URLBACKUPSHELLSCRIPT="https://www.dropbox.com/s/0z3erarvfhaq8gy/Backup.sh" 
-URLCLOUDFLARESHELLSCRIPT="https://www.dropbox.com/s/l713o9dq5fq00cn/cloudflare.sh"
+URLBACKUPSHELLSCRIPT="https://github.com/keithrozario/WordpressRestore/blob/master/Backup.sh" 
+URLCLOUDFLARESHELLSCRIPT="https://github.com/keithrozario/WordpressRestore/blob/master/cloudflare.sh"
 
 #---------------------------------------------------------------------------------------
 # Main-Initilization
