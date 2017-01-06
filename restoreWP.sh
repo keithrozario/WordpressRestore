@@ -112,8 +112,6 @@ WPCONFIGFILEENC=wp-config.php.enc
 APACHECONFIG=apachecfg_static.tar
 
 URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
-URLBACKUPSHELLSCRIPT="https://github.com/keithrozario/WordpressRestore/blob/master/Backup.sh" 
-URLCLOUDFLARESHELLSCRIPT="https://github.com/keithrozario/WordpressRestore/blob/master/cloudflare.sh"
 
 #---------------------------------------------------------------------------------------
 # Main-Initilization
@@ -129,12 +127,10 @@ export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 if [ "$DNSUPDATE" = true ]; then
 
 	echo "Getting Cloudflare script from $URLCLOUDFLARESHELLSCRIPT"
-	wget $URLCLOUDFLARESHELLSCRIPT
-	chmod +x /cloudflare.sh
 	echo "Updating cloudflare record $CFRECORD in zone $CFZONE using credentials $CFEMAIL , $CFKEY "
 	./cloudflare.sh --email $CFEMAIL --key $CFKEY --zone $CFZONE --record $CFRECORD
 	echo "Removing Cloudflare script"
-	rm cloudflare.sh
+	rm cloudflare.sh #you only need it once
 	
 else
 
@@ -218,9 +214,7 @@ sudo service apache2 restart #restart apache for php to take effect
 #---------------------------------------------------------------------------------------
 # Download backup script
 #---------------------------------------------------------------------------------------
-wget $URLBACKUPSHELLSCRIPT
 mv Backup.sh /var
-chmod +x /var/Backup.sh
 ( crontab -l ; echo "0 23 * * * /var/Backup.sh" ) | crontab - #cron-job the backup-script
 
 
