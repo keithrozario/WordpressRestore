@@ -58,6 +58,7 @@ URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Gi
 DROPBOXPATH=~/var/Dropbox-Uploader
 
 WPCONFPASSFILE=~/.wpconfpass
+
 BACKUPSHDIR=~/var
 BACKUPSHNAME=backupWP.sh
 
@@ -76,9 +77,12 @@ chmod +x $DROPBOXPATH/dropbox_uploader.sh
 echo "WPCONFPASS=$WPCONFPASS" > ~/.wpconfpass #store wpconfigpass in config file
 
 #---------------------------------------------------------------------------------------
-# Download Backup Shell file and create CRON job
+# Download Backup Script and create CRON job
 #---------------------------------------------------------------------------------------
+echo "Downloading Backup Script"
 wget https://github.com/keithrozario/WordpressRestore/blob/master/$BACKUPSHNAME
+echo "Backup Script Downloaded -- creating CRON Job"
 mv $BACKUPSHNAME $BACKUPSHDIR
 ( crontab -l ; echo "0 23 * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
+echo "Setup Complete"
 
