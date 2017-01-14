@@ -67,6 +67,7 @@ BACKUPSHNAME=backupWP.sh
 #---------------------------------------------------------------------------------------
 echo "Saving Token : $DROPBOXTOKEN to file"
 echo "OAUTH_ACCESS_TOKEN=$DROPBOXTOKEN" > $DROPBOXUPLOADERFILE
+chmod 440 $DROPBOXUPLOADERFILE
 echo "Downloading DropboxDownloader from $URLDROPBOXDOWNLOADER"
 git clone $URLDROPBOXDOWNLOADER $DROPBOXPATH
 chmod +x $DROPBOXPATH/dropbox_uploader.sh
@@ -81,6 +82,7 @@ echo "WPCONFPASS=$WPCONFPASS" > ~/.wpconfpass #store wpconfigpass in config file
 #---------------------------------------------------------------------------------------
 echo "Downloading Backup Script"
 wget https://github.com/keithrozario/WordpressRestore/blob/master/$BACKUPSHNAME
+chmod 440 $BACKUPSHNAME
 echo "Backup Script Downloaded -- creating CRON Job"
 mv $BACKUPSHNAME $BACKUPSHDIR
 ( crontab -l ; echo "0 23 * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
