@@ -3,9 +3,8 @@
 # Backups wordpress with one click
 #
 # Author: Keith Rozario <keith@keithrozario.com>
-# Usage:    ./backupWP.sh --wpconfpass [encryption_key]
-#           Encryption Key will be saved to file and used for each subsequent upload
-#           Encryption is mandatory, and a key must be provided for first time use
+# Usage:./backupWP.sh 
+#       Ensure you've run ./setup.sh first, to setup the encryption key and download Dropbox-Uploader           
 #
 # This work is licensed under the
 # Creative Commons Attribution 4.0 International License.
@@ -17,58 +16,13 @@
 WPCONFPASSFILE=~/.wpconfpass
 
 #-------------------------------------------------------------------------
-# Command Line Arguments
-#-------------------------------------------------------------------------
-while [[ $# -gt 1 ]]
-do
-key="$1"
-
-case $key in
-    --wpconfpass)
-    WPCONFPASSARG="$2"
-    shift # past argument
-    ;;
-    --dropboxtoken)
-    DROPBOXTOKEN="$2"
-    shift # past argument
-    ;;
-    --default)
-    DEFAULT=YES
-    ;;
-    *)
-            # unknown option
-    ;;
-esac
-shift # past argument or value
-done
-
-#-------------------------------------------------------------------------
 # Check if WPCONFPASSFILE or WPCONFPASSARG--or both!
 #-------------------------------------------------------------------------
 if [ -f $WPCONFPASSFILE ]; then
-#File exist, Arg not supplied------------------------------------------------
-  if [ -z '$WPCONFPASSARG' ]; then 
-    $(cat $WPCONFPASSFILE | grep -v ^# | xargs)
-#File exist, Arg supplied----------------------------------------------------  
-  else 
-    echo "Encryption key provided, but one already exist, over-riding existing key"
-    $(cat $WPCONFPASSFILE | grep -v ^# | xargs)
-    rm $WPCONFPASSFILE
-    echo "WPCONFPASS=$WPCONFPASSARG" > $WPCONFPASSFILE
-  fi
-else
-#File does not exist, Arg not supplied-------------------------------------
-   if [ -z '$WPCONFPASSARG' ]; then 
-    echo "Encryption does not exist on system, and is not provided, aborting"
-    exit 0
-#File does not exist, Arg supplied-----------------------------------------
-   else
-    echo "First Time setup, saving encryption key"
-    $(cat $WPCONFPASSFILE | grep -v ^# | xargs)
-    echo "WPCONFPASS=$WPCONFPASSARG" > $WPCONFPASSFILE #save encryption key to file
-   fi
+    source "$WPCONFPASSFILE" 2>/dev/null #file exist, load variables
+else 
+    echo "Unable to find $WPCONFPASSFILE, please run setup.sh for first time setup"
 fi
-
 
 #-------------------------------------------------------------------------
 # FileNames
@@ -77,10 +31,10 @@ WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
 WPCONFIGFILEENC=wp-config.php.enc
 APACHECONFIG=apachecfg_dynamic.tar
-BACKUPPATH=~/var/backupWP
-WPDIR=~/var/www
-WPCONFIGDIR = ~/var
-DROPBOXUPDIR = ~/var/Dropbox-Uploader
+BACKUPPATH=/var/backupWP
+WPDIR=/var/www
+WPCONFIGDIR=/var
+DROPBOXUPDIR=/var/Dropbox-Uploader
 
 #-------------------------------------------------------------------------
 # Delete Previous files if they exist
@@ -98,13 +52,12 @@ mysqldump wordpress > $BACKUPPATH/$WPSQLFILE
 #-------------------------------------------------------------------------
 # Zip /var/wwwfolder
 #-------------------------------------------------------------------------
-tar czf $BACKUPPATH/$WPZIPFILE $WPDIR #turn off verbos (it's too noisy!!)
+tar czf $BACKUPPATH/$WPZIPFILE $WPDIR #turn off verbose (it's too noisy!!)
 
 #-------------------------------------------------------------------------
 # Encrypt wp-config.php file
 #-------------------------------------------------------------------------
 openssl enc -aes-256-cbc -in $WPCONFIGDIR/wp-config.php -out $BACKUPPATH/$WPCONFIGFILEENC -k $WPCONFIGENCKEY
-
 
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
