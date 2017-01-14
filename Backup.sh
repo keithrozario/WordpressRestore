@@ -3,7 +3,7 @@
 # Backups wordpress with one click
 #
 # Author: Keith Rozario <keith@keithrozario.com>
-# Usage:    ./Backup.sh --wpconfpass [encryption_key]
+# Usage:    ./backupWP.sh --wpconfpass [encryption_key]
 #           Encryption Key will be saved to file and used for each subsequent upload
 #           Encryption is mandatory, and a key must be provided for first time use
 #
@@ -13,11 +13,6 @@
 # http://creativecommons.org/licenses/by/4.0/ or 
 # send a letter to 
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
-#
-#
-#
-
-
 
 WPCONFPASSFILE=~/.wpconfpass
 
@@ -31,6 +26,10 @@ key="$1"
 case $key in
     --wpconfpass)
     WPCONFPASSARG="$2"
+    shift # past argument
+    ;;
+    --dropboxtoken)
+    DROPBOXTOKEN="$2"
     shift # past argument
     ;;
     --default)
@@ -78,46 +77,51 @@ WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
 WPCONFIGFILEENC=wp-config.php.enc
 APACHECONFIG=apachecfg_dynamic.tar
+BACKUPPATH=~/var/backupWP
+WPDIR=~/var/www
+WPCONFIGDIR = ~/var
+DROPBOXUPDIR = ~/var/Dropbox-Uploader
 
 #-------------------------------------------------------------------------
 # Delete Previous files if they exist
 #-------------------------------------------------------------------------
-rm /var/$WPZIPFILE
-rm /var/$WPSQLFILE
-rm /var/$APACHECONFIG
-rm /var/$WPCONFIGFILEENC
+rm $BACKUPPATH/$WPZIPFILE
+rm $BACKUPPATH/$WPSQLFILE
+rm $BACKUPPATH/$APACHECONFIG
+rm $BACKUPPATH/$WPCONFIGFILEENC
 
 #-------------------------------------------------------------------------
 # Copyd MYSQL Database
 #-------------------------------------------------------------------------
-mysqldump wordpress > /var/$WPSQLFILE
+mysqldump wordpress > $BACKUPPATH/$WPSQLFILE
 
 #-------------------------------------------------------------------------
 # Zip /var/wwwfolder
 #-------------------------------------------------------------------------
-tar cvzf /var/$WPZIPFILE /var/www
+tar czf $BACKUPPATH/$WPZIPFILE $WPDIR #turn off verbos (it's too noisy!!)
 
 #-------------------------------------------------------------------------
 # Encrypt wp-config.php file
 #-------------------------------------------------------------------------
-openssl enc -aes-256-cbc -in /var/wp-config.php -out /var/$WPCONFIGFILEENC -k $WPCONFIGENCKEY
+openssl enc -aes-256-cbc -in $WPCONFIGDIR/wp-config.php -out $BACKUPPATH/$WPCONFIGFILEENC -k $WPCONFIGENCKEY
+
 
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
 #-------------------------------------------------------------------------
-tar cvf /var/$APACHECONFIG /etc/apache2/sites-enabled
-tar -rvf /var/$APACHECONFIG /etc/apache2/sites-available
-tar -rvf /var/$APACHECONFIG /etc/apache2/ssl
-tar -rvf /var/$APACHECONFIG /etc/apache2/apache2.conf
-tar -rvf /var/$APACHECONFIG /etc/apache2/.htpasswd
-tar -rvf /var/$APACHECONFIG /etc/apache2/ports.conf
+tar cvf $BACKUPPATH/$APACHECONFIG /etc/apache2/sites-enabled
+tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/sites-available
+tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ssl
+tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/apache2.conf
+tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/.htpasswd
+tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ports.conf
 
 #-------------------------------------------------------------------------
 # Upload to Dropbox
 #-------------------------------------------------------------------------
-/var/Dropbox-Uploader/dropbox_uploader.sh upload /var/$WPSQLFILE /
-/var/Dropbox-Uploader/dropbox_uploader.sh upload /var/$WPZIPFILE /
-/var/Dropbox-Uploader/dropbox_uploader.sh upload /var/$APACHECONFIG /
-/var/Dropbox-Uploader/dropbox_uploader.sh upload /var/$WPCONFIGFILEENC /
+$DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPSQLFILE /
+$DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPZIPFILE /
+$DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG /
+$DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILEENC /
 
 
