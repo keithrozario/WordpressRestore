@@ -85,6 +85,6 @@ echo "Backup Script Downloaded -- creating CRON Job"
 chmod 644 $BACKUPSHNAME
 mv $BACKUPSHNAME $BACKUPSHDIR
 
-( crontab -l ; echo "0 23 * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
+( crontab -l ; echo "10 * * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
 echo "Setup Complete"
 
