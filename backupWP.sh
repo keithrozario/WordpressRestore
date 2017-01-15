@@ -30,7 +30,7 @@ fi
 #-------------------------------------------------------------------------
 WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
-WPCONFIGFILE=wp-config.php
+
 APACHECONFIG=apachecfg_dynamic.tar
 BACKUPPATH=/var/backupWP
 # WPDIR=/var/www/html #taken from .wpsettings file
@@ -41,10 +41,8 @@ BACKUPPATH=/var/backupWP
 #-------------------------------------------------------------------------
 # Delete Previous files if they exist (ensure idempotency)
 #-------------------------------------------------------------------------
-rm $BACKUPPATH/$WPZIPFILE
-rm $BACKUPPATH/$WPSQLFILE
-rm $BACKUPPATH/$APACHECONFIG
-rm $BACKUPPATH/$WPCONFIGFILEENC
+rm -r BACKUPPATH
+mkdir BACKUPPATH
 
 #-------------------------------------------------------------------------
 # mysqldump the MYSQL Database
@@ -57,8 +55,8 @@ echo "Dumping MYSQL Files"
 mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE.temp
 echo "Encrypting MYSQL FIles"
 openssl enc -aes-256-cbc -in $BACKUPPATH/$WPSQLFILE.temp -out $BACKUPPATH/$WPSQLFILE -k $ENCKEY
-rm $BACKUPPATH/$WPZIPFILE.temp
-echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE.enc"
+rm $BACKUPPATH/$WPZIPFILE.temp #remove unencrypted file
+echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 
 #-------------------------------------------------------------------------
 # Zip $WPDIR folder
@@ -68,18 +66,17 @@ tar czf $BACKUPPATH/$WPZIPFILE.temp $WPDIR #turn off verbose (it's too noisy!!)
 echo "Encrypting TAR file:
 openssl enc -aes-256-cbc -in $BACKUPPATH/$WPZIPFILE.temp -out $BACKUPPATH/$WPZIPFILE -k $ENCKEY
 rm $BACKUPPATH/$WPZIPFILE.temp
-echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE.enc"
+echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE"
 
 #-------------------------------------------------------------------------
 # Encrypt wp-config.php file
 #-------------------------------------------------------------------------
 if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
     echo "Encrypting wp-config.php file in $WPCONFDIR"   
-    openssl enc -aes-256-cbc -in $WPCONFDIR/wp-config.php -out $BACKUPPATH/$WPCONFIGFILE -k $ENCKEY
+    openssl enc -aes-256-cbc -in $WPCONFDIR/wp-config.php -out $BACKUPPATH/wp-config.php -k $ENCKEY
 else
     echo "wp-config.php file is in the wordpress directory"
 fi
-
 
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
