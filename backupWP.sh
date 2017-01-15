@@ -32,8 +32,8 @@ WPZIPFILE=wordpress.tgz
 WPCONFIGFILEENC=wp-config.php.enc
 APACHECONFIG=apachecfg_dynamic.tar
 BACKUPPATH=/var/backupWP
-WPDIR=/var/www
-WPCONFIGDIR=/var
+WPDIR=/var/www/html
+WPCONFIGDIR=/var/html
 DROPBOXUPDIR=/var/Dropbox-Uploader
 
 #-------------------------------------------------------------------------
@@ -47,10 +47,14 @@ rm $BACKUPPATH/$WPCONFIGFILEENC
 #-------------------------------------------------------------------------
 # Copyd MYSQL Database
 #-------------------------------------------------------------------------
-mysqldump wordpress > $BACKUPPATH/$WPSQLFILE
+WPDBNAME=`cat $WPDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
+WPDBUSER=`cat $WPDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
+WPDBPASS=`cat $WPDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
+
+mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE
 
 #-------------------------------------------------------------------------
-# Zip /var/wwwfolder
+# Zip /var/www folder
 #-------------------------------------------------------------------------
 tar czf $BACKUPPATH/$WPZIPFILE $WPDIR #turn off verbose (it's too noisy!!)
 
@@ -76,5 +80,13 @@ $DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPSQLFILE /
 $DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPZIPFILE /
 $DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG /
 $DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILEENC /
+
+#-------------------------------------------------------------------------
+# Delete Backups (for security purposes)
+#-------------------------------------------------------------------------
+rm $BACKUPPATH/$WPZIPFILE
+rm $BACKUPPATH/$WPSQLFILE
+rm $BACKUPPATH/$APACHECONFIG
+rm $BACKUPPATH/$WPCONFIGFILEENC
 
 
