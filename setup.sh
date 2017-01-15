@@ -61,13 +61,14 @@ fi
 
 if [ -z "$WPDIR" ]; then
 	echo "Wordpress Directory not provided, assuming /var/www/html"
-	$WPDIR=/var/www/html
+	WPDIR=/var/www/html
 else
 	echo "Wordpress Directory set to $WPDIR"
 fi
 
 if [ -z "$WPCONFDIR" ]; then
 	echo "Wordpress config directory not provided, setting to wordpress directory: $WPDIR"
+	WPCONFDIR=$WPDIR
 else
 	echo "Wordpress config directory set to $WPCONFDIR"
 fi
