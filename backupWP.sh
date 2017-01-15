@@ -55,7 +55,7 @@ echo "Dumping MYSQL Files"
 mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE.temp
 echo "Encrypting MYSQL FIles"
 openssl enc -aes-256-cbc -in $BACKUPPATH/$WPSQLFILE.temp -out $BACKUPPATH/$WPSQLFILE -k $ENCKEY
-rm $BACKUPPATH/$WPZIPFILE.temp #remove unencrypted file
+rm $BACKUPPATH/$WPSQLFILE.temp #remove unencrypted file
 echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 
 #-------------------------------------------------------------------------
@@ -63,7 +63,7 @@ echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 #-------------------------------------------------------------------------
 echo "Zipping the Wordpress Directory in : $WPDIR"
 tar czf $BACKUPPATH/$WPZIPFILE.temp $WPDIR #turn off verbose (it's too noisy!!)
-echo "Encrypting TAR file:
+echo "Encrypting TAR file:"
 openssl enc -aes-256-cbc -in $BACKUPPATH/$WPZIPFILE.temp -out $BACKUPPATH/$WPZIPFILE -k $ENCKEY
 rm $BACKUPPATH/$WPZIPFILE.temp
 echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE"
@@ -75,7 +75,7 @@ if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
     echo "Encrypting wp-config.php file in $WPCONFDIR"   
     openssl enc -aes-256-cbc -in $WPCONFDIR/wp-config.php -out $BACKUPPATH/wp-config.php -k $ENCKEY
 else
-    echo "wp-config.php file is in the wordpress directory"
+    echo "wp-config.php file is in the wordpress directory, no separate zipping necessary"
 fi
 
 #-------------------------------------------------------------------------
@@ -83,10 +83,17 @@ fi
 #-------------------------------------------------------------------------
 tar cvf $BACKUPPATH/$APACHECONFIG /etc/apache2/sites-enabled
 tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/sites-available
-tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ssl
 tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/apache2.conf
-tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/.htpasswd
 tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ports.conf
+
+#copy the following files only if they exist
+if [ -f /etc/apache2/ssl ]; then
+    tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ssl
+fi
+
+if [ -f /etc/apache2/.htpasswd ]; then
+    tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/.htpasswd
+fi
 
 #-------------------------------------------------------------------------
 # Upload to Dropbox
@@ -94,7 +101,10 @@ tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ports.conf
 $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSQLFILE /
 $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPZIPFILE /
 $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG /
-$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILE /
+if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
+    $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILE /
+fi
+$DROPBOXPATH/dropbox_uploader.sh upload $WPSETTINGSFILE /
 
 #-------------------------------------------------------------------------
 # Delete Backups (for security purposes)
