@@ -105,11 +105,3 @@ if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
     $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILE /
 fi
 $DROPBOXPATH/dropbox_uploader.sh upload $WPSETTINGSFILE /
-
-#-------------------------------------------------------------------------
-# Delete Backups (for security purposes)
-#-------------------------------------------------------------------------
-rm $BACKUPPATH/$WPZIPFILE
-rm $BACKUPPATH/$WPSQLFILE
-rm $BACKUPPATH/$APACHECONFIG
-rm $BACKUPPATH/$WPCONFIGFILE
