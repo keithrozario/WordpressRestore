@@ -13,31 +13,33 @@
 # send a letter to 
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
-WPCONFPASSFILE=~/.wpconfpass
+WPSETTINGSFILE=/var/.wpsettings
 
 #-------------------------------------------------------------------------
 # Check if WPCONFPASSFILE or WPCONFPASSARG--or both!
 #-------------------------------------------------------------------------
-if [ -f $WPCONFPASSFILE ]; then
-    source "$WPCONFPASSFILE" 2>/dev/null #file exist, load variables
+if [ -f $WPSETTINGSFILE ]; then
+    source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
 else 
-    echo "Unable to find $WPCONFPASSFILE, please run setup.sh for first time setup"
+    echo "Unable to find $WPSETTINGSFILE, please run setup.sh for first time setup.sh"
+    exit 0
 fi
 
 #-------------------------------------------------------------------------
-# FileNames
+# Global Constants
 #-------------------------------------------------------------------------
 WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
-WPCONFIGFILEENC=wp-config.php.enc
+WPCONFIGFILE=wp-config.php
 APACHECONFIG=apachecfg_dynamic.tar
 BACKUPPATH=/var/backupWP
-WPDIR=/var/www/html
-WPCONFIGDIR=/var/html
-DROPBOXUPDIR=/var/Dropbox-Uploader
+# WPDIR=/var/www/html #taken from .wpsettings file
+# WPCONFDIR=/var/www/html #taken from .wpsettings file
+# DROPBOXPATH=/var/Dropbox-Uploader #taken from .wpsettings file
+# ENCKEY=<xxxx> #taken from .wpsettings file
 
 #-------------------------------------------------------------------------
-# Delete Previous files if they exist
+# Delete Previous files if they exist (ensure idempotency)
 #-------------------------------------------------------------------------
 rm $BACKUPPATH/$WPZIPFILE
 rm $BACKUPPATH/$WPSQLFILE
@@ -45,23 +47,39 @@ rm $BACKUPPATH/$APACHECONFIG
 rm $BACKUPPATH/$WPCONFIGFILEENC
 
 #-------------------------------------------------------------------------
-# Copyd MYSQL Database
+# mysqldump the MYSQL Database
 #-------------------------------------------------------------------------
-WPDBNAME=`cat $WPDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
-WPDBUSER=`cat $WPDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
-WPDBPASS=`cat $WPDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
+WPDBNAME=`cat $WPCONFDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
+WPDBUSER=`cat $WPCONFDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
+WPDBPASS=`cat $WPCONFDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
 
-mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE
+echo "Dumping MYSQL Files"
+mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE.temp
+echo "Encrypting MYSQL FIles"
+openssl enc -aes-256-cbc -in $BACKUPPATH/$WPSQLFILE.temp -out $BACKUPPATH/$WPSQLFILE -k $ENCKEY
+rm $BACKUPPATH/$WPZIPFILE.temp
+echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE.enc"
 
 #-------------------------------------------------------------------------
-# Zip /var/www folder
+# Zip $WPDIR folder
 #-------------------------------------------------------------------------
-tar czf $BACKUPPATH/$WPZIPFILE $WPDIR #turn off verbose (it's too noisy!!)
+echo "Zipping the Wordpress Directory in : $WPDIR"
+tar czf $BACKUPPATH/$WPZIPFILE.temp $WPDIR #turn off verbose (it's too noisy!!)
+echo "Encrypting TAR file:
+openssl enc -aes-256-cbc -in $BACKUPPATH/$WPZIPFILE.temp -out $BACKUPPATH/$WPZIPFILE -k $ENCKEY
+rm $BACKUPPATH/$WPZIPFILE.temp
+echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE.enc"
 
 #-------------------------------------------------------------------------
 # Encrypt wp-config.php file
 #-------------------------------------------------------------------------
-openssl enc -aes-256-cbc -in $WPCONFIGDIR/wp-config.php -out $BACKUPPATH/$WPCONFIGFILEENC -k $WPCONFIGENCKEY
+if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
+    echo "Encrypting wp-config.php file in $WPCONFDIR"   
+    openssl enc -aes-256-cbc -in $WPCONFDIR/wp-config.php -out $BACKUPPATH/$WPCONFIGFILE -k $ENCKEY
+else
+    echo "wp-config.php file is in the wordpress directory"
+fi
+
 
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
@@ -76,10 +94,10 @@ tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ports.conf
 #-------------------------------------------------------------------------
 # Upload to Dropbox
 #-------------------------------------------------------------------------
-$DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPSQLFILE /
-$DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPZIPFILE /
-$DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG /
-$DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILEENC /
+$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSQLFILE /
+$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPZIPFILE /
+$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG /
+$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILE /
 
 #-------------------------------------------------------------------------
 # Delete Backups (for security purposes)
@@ -87,6 +105,4 @@ $DROPBOXUPDIR/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILEENC /
 rm $BACKUPPATH/$WPZIPFILE
 rm $BACKUPPATH/$WPSQLFILE
 rm $BACKUPPATH/$APACHECONFIG
-rm $BACKUPPATH/$WPCONFIGFILEENC
-
-
+rm $BACKUPPATH/$WPCONFIGFILE
