@@ -80,11 +80,9 @@ DROPBOXUPLOADERFILE=~/.dropbox_uploader
 URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
 DROPBOXPATH=/var/Dropbox-Uploader
 
-WPSETTINGSFILE=~/.wpconfpass
-
 BACKUPSHDIR=/var
 BACKUPSHNAME=backupWP.sh
-WPSETTINGSFILE=$BACKUPSHDIR/.wpconfpass
+WPSETTINGSFILE=$BACKUPSHDIR/.wpsettings
 
 #---------------------------------------------------------------------------------------
 # Download DropboxUploader and Setup
@@ -99,10 +97,11 @@ chmod +x $DROPBOXPATH/dropbox_uploader.sh
 #---------------------------------------------------------------------------------------
 # Setup Encryption Key file
 #---------------------------------------------------------------------------------------
+rm $WPSETTINGSFILE
 echo "ENCKEY=$ENCKEY" > $WPSETTINGSFILE #store wpconfigpass in config file
-echo "WPDIR=$WPDIR" > $WPSETTINGSFILE #store wordpress directory in config file
-echo "WPCONFDIR=$WPCONFDIR" > $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
-echo "DROPBOXPATH=$DROPBOXPATH" > $WPSETTINGSFILE #store dropbox uploader path in directory
+echo "WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
+echo "WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
+echo "DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
 
 #---------------------------------------------------------------------------------------
 # Download Backup Script and create CRON job
