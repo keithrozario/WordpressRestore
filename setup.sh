@@ -100,8 +100,9 @@ chmod +x $DROPBOXPATH/dropbox_uploader.sh
 # Setup Encryption Key file
 #---------------------------------------------------------------------------------------
 echo "ENCKEY=$ENCKEY" > $WPSETTINGSFILE #store wpconfigpass in config file
-echo "WPDIR=$WPDIR" > $WPSETTINGSFILE #store wpconfigpass in config file
-echo "WPCONFDIR=$WPCONFDIR" > $WPSETTINGSFILE #store wpconfigpass in config file
+echo "WPDIR=$WPDIR" > $WPSETTINGSFILE #store wordpress directory in config file
+echo "WPCONFDIR=$WPCONFDIR" > $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
+echo "DROPBOXPATH=$DROPBOXPATH" > $WPSETTINGSFILE #store dropbox uploader path in directory
 
 #---------------------------------------------------------------------------------------
 # Download Backup Script and create CRON job
