@@ -41,8 +41,8 @@ BACKUPPATH=/var/backupWP
 #-------------------------------------------------------------------------
 # Delete Previous files if they exist (ensure idempotency)
 #-------------------------------------------------------------------------
-rm -r BACKUPPATH
-mkdir BACKUPPATH
+rm -r $BACKUPPATH
+mkdir $BACKUPPATH
 
 #-------------------------------------------------------------------------
 # mysqldump the MYSQL Database
