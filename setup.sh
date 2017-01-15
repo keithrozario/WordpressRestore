@@ -82,7 +82,7 @@ echo "WPCONFPASS=$WPCONFPASS" > ~/.wpconfpass #store wpconfigpass in config file
 #---------------------------------------------------------------------------------------
 chmod 440 $BACKUPSHNAME
 echo "Backup Script Downloaded -- creating CRON Job"
-chmod 644 $BACKUPSHNAME
+chmod 775 $BACKUPSHNAME
 mv $BACKUPSHNAME $BACKUPSHDIR
 
 ( crontab -l ; echo "10 * * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
