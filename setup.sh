@@ -4,8 +4,10 @@
 #
 # file: setup.sh
 # usage: setup.sh --dropboxtoken <xxx> --wpconfpass <xxx>
-#       --dropboxtoken : Access Token For Dropbox [MANDATORY]
-#       --wpconfpass   : Encryption Key for backup files [MANDATORY]
+#       --dropboxtoken 	: Access Token For Dropbox [MANDATORY]
+#       --enckey   	: Encryption Key for backup files [MANDATORY]
+#	--wpdir		: directory of the wordpress php files [OPTIONAL, default = "/var/www/html"]
+#	--wpconfdir	: directory of the wordpress wp-config.php file [OPTIONAL, default = "var/ww/html"]
 #
 # Author: Keith Rozario <keith@keithrozario.com>
 #
@@ -27,11 +29,19 @@ case $key in
     DROPBOXTOKEN="$2"
     shift # past argument
     ;;
-	--wpconfpass)
-    WPCONFPASS="$2"
+    --enckey)
+    ENCKEY="$2"
     shift # past argument
     ;;
-	--default)
+    --wpdir)
+    WPDIR="$2"
+    shift # past argument
+    ;;
+    --wpconfdir)
+    WPCONFDIR="$2"
+    shift # past argument
+    ;;
+    --default)
     DEFAULT=YES
     ;;
     *)
@@ -42,11 +52,24 @@ shift # past argument or value
 done
 
 if [ -z "$DROPBOXTOKEN" ] || [ -z "$WPCONFPASS" ]; then  #Check Parameters
-echo "Please provide access token for Dropbox and Encryption Key, both are mandatory"
-exit 0
+	echo "Please provide access token for Dropbox and Encryption Key, both are mandatory"
+	exit 0
 else #both parameters provided, proceed
-echo "Dropbox Token : Good"
-echo "WP-Config Key : Good"
+	echo "Dropbox Token : Good"
+	echo "WP-Config Key : Good"
+fi
+
+if [-z "$WPDIR" ]; then
+	echo "Wordpress Directory not provided, assuming /var/www/html"
+	$WPDIR="/var/www/html"
+else
+	echo "Wordpress Directory set to $WPDIR"
+fi
+
+if [-z "$WPCONFDIR" ]; then
+	echo "Wordpress config directory not provided, setting to wordpress directory: $WPDIR"
+else
+	echo "Wordpress config directory set to $WPCONFDIR"
 fi
 
 #---------------------------------------------------------------------------------------
@@ -57,10 +80,11 @@ DROPBOXUPLOADERFILE=~/.dropbox_uploader
 URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
 DROPBOXPATH=/var/Dropbox-Uploader
 
-WPCONFPASSFILE=~/.wpconfpass
+WPSETTINGSFILE=~/.wpconfpass
 
 BACKUPSHDIR=/var
 BACKUPSHNAME=backupWP.sh
+WPSETTINGSFILE=$BACKUPSHDIR/.wpconfpass
 
 #---------------------------------------------------------------------------------------
 # Download DropboxUploader and Setup
@@ -75,13 +99,13 @@ chmod +x $DROPBOXPATH/dropbox_uploader.sh
 #---------------------------------------------------------------------------------------
 # Setup Encryption Key file
 #---------------------------------------------------------------------------------------
-echo "WPCONFPASS=$WPCONFPASS" > ~/.wpconfpass #store wpconfigpass in config file
+echo "ENCKEY=$ENCKEY" > $WPSETTINGSFILE #store wpconfigpass in config file
+echo "WPDIR=$WPDIR" > $WPSETTINGSFILE #store wpconfigpass in config file
+echo "WPCONFDIR=$WPCONFDIR" > $WPSETTINGSFILE #store wpconfigpass in config file
 
 #---------------------------------------------------------------------------------------
 # Download Backup Script and create CRON job
 #---------------------------------------------------------------------------------------
-chmod 440 $BACKUPSHNAME
-echo "Backup Script Downloaded -- creating CRON Job"
 chmod 775 $BACKUPSHNAME
 mv $BACKUPSHNAME $BACKUPSHDIR
 
