@@ -61,7 +61,7 @@ fi
 
 if [ -z "$WPDIR" ]; then
 	echo "Wordpress Directory not provided, assuming /var/www/html"
-	$WPDIR="/var/www/html"
+	$WPDIR=/var/www/html
 else
 	echo "Wordpress Directory set to $WPDIR"
 fi
