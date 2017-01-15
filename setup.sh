@@ -51,7 +51,7 @@ esac
 shift # past argument or value
 done
 
-if [ -z "$DROPBOXTOKEN" ] || [ -z "$WPCONFPASS" ]; then  #Check Parameters
+if [ -z "$DROPBOXTOKEN" ] || [ -z "$ENCKEY" ]; then  #Check Parameters
 	echo "Please provide access token for Dropbox and Encryption Key, both are mandatory"
 	exit 0
 else #both parameters provided, proceed
