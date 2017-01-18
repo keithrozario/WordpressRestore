@@ -21,18 +21,19 @@ WPSETTINGSFILE=/var/.wpsettings
 if [ -f $WPSETTINGSFILE ]; then
     source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
 else 
-    echo "Unable to find $WPSETTINGSFILE, please run setup.sh for first time setup.sh"
+    echo "Unable to find $WPSETTINGSFILE, please run setup.sh for first time"
     exit 0
 fi
 
 #-------------------------------------------------------------------------
 # Global Constants
 #-------------------------------------------------------------------------
-WPSQLFILE=wordpress.sql
-WPZIPFILE=wordpress.tgz
+WPSQLFILE=wordpress.sql.enc #.enc is the encrypted file
+WPZIPFILE=wordpress.tgz.enc #.enc is the encrypted file
 
 APACHECONFIG=apachecfg_dynamic.tar
 BACKUPPATH=/var/backupWP
+
 # WPDIR=/var/www/html #taken from .wpsettings file
 # WPCONFDIR=/var/www/html #taken from .wpsettings file
 # DROPBOXPATH=/var/Dropbox-Uploader #taken from .wpsettings file
