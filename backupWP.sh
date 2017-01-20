@@ -14,6 +14,7 @@
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 WPSETTINGSFILE=/var/.wpsettings
+ENCKEYFILE=/var/.enckey
 
 #-------------------------------------------------------------------------
 # Check if WPCONFPASSFILE or WPCONFPASSARG--or both!
@@ -22,6 +23,13 @@ if [ -f $WPSETTINGSFILE ]; then
     source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
 else 
     echo "Unable to find $WPSETTINGSFILE, please run setup.sh for first time"
+    exit 0
+fi
+
+if [ -f $ENCKEYFILE ]; then
+    source "$ENCKEYFILE" 2>/dev/null #file exist, load variables
+else 
+    echo "Unable to find $ENCKEYFILE, please run setup.sh for first time"
     exit 0
 fi
 
