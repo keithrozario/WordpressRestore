@@ -84,6 +84,7 @@ DROPBOXPATH=/var/Dropbox-Uploader
 BACKUPSHDIR=/var
 BACKUPSHNAME=backupWP.sh
 WPSETTINGSFILE=$BACKUPSHDIR/.wpsettings
+ENCKEYFILE=$BACKUPSHDIR/.enckey
 
 #---------------------------------------------------------------------------------------
 # Download DropboxUploader and Setup
@@ -99,7 +100,7 @@ chmod +x $DROPBOXPATH/dropbox_uploader.sh
 # Setup Encryption Key file
 #---------------------------------------------------------------------------------------
 rm $WPSETTINGSFILE
-echo "ENCKEY=$ENCKEY" > $WPSETTINGSFILE #store wpconfigpass in config file
+echo "ENCKEY=$ENCKEY" > $ENCKEYFILE #store wpconfigpass in config file
 echo "WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
 echo "WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
 echo "DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
