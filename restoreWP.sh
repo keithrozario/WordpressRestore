@@ -48,20 +48,24 @@ case $key in
     ENCKEY="$2"
     shift # past argument
     ;;
-	--cfemail)
+    --cfemail)
     CFEMAIL="$2"
     shift # past argument
     ;;
-	--cfkey)
+    --cfkey)
     CFKEY="$2"
     shift # past argument
     ;;
-	--cfzone)
+    --cfzone)
     CFZONE="$2"
     shift # past argument
     ;;
-	--cfrecord)
+    --cfrecord)
     CFRECORD="$2"
+    shift # past argument
+    ;;
+    --prodcert)
+    PRODCERT="$2"
     shift # past argument
     ;;
     *)
@@ -93,10 +97,19 @@ echo "Cloudflare Parameters : Good"
 DNSUPDATE=true
 fi
 
+if [ -z "$PRODCERT" ]; #Check for Dropboxtoken
+then echo "--prodcert not set, let's encrypt certificate calling switched off"
+else
+	if [ $PRODCERT=1 ]; then
+	echo "--prodcert set to 1, calling Let's Encrypt in Production mode"
+	else
+	echo "--prodcert not set to 1, calling Let's Encrypt in test mode"
+	fi
+fi
+
 #---------------------------------------------------------------------------------------
 # Global Constants
 #---------------------------------------------------------------------------------------
-PRODUCTIONCERT=false
 
 WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
@@ -110,17 +123,12 @@ WPSETTINGSFILEDIR=/var
 #---------------------------------------------------------------------------------------
 
 if [ "$DNSUPDATE" = true ]; then
-
-	echo "Getting Cloudflare script from $URLCLOUDFLARESHELLSCRIPT"
 	echo "Updating cloudflare record $CFRECORD in zone $CFZONE using credentials $CFEMAIL , $CFKEY "
 	./cloudflare.sh --email $CFEMAIL --key $CFKEY --zone $CFZONE --record $CFRECORD
 	echo "Removing Cloudflare script"
 	rm cloudflare.sh #you only need it once
-	
 else
-
 	echo "WARNING: DNS wasn't updated"
-	
 fi
 
 
@@ -128,7 +136,7 @@ fi
 #Setup DropboxUploader
 #---------------------------------------------------------------------------------------
 
-GetDropboxUploader $DROPBOXTOKEN
+GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 
 #---------------------------------------------------------------------------------------
 #Download .wpsettings file
@@ -260,28 +268,30 @@ sudo apt-get -y install php-mysql
 sudo service apache2 restart
 
 #---------------------------------------------------------------------------------------
-# Setup backup script
+# Setup backup script & Cron jobs
 #---------------------------------------------------------------------------------------
 SetCronJob #from functions.sh
 SetEncKey $ENCKEY
-ENCKEY=0
-
+ENCKEY=0 #for security reasons set back to 0
 
 #---------------------------------------------------------------------------------------
 # Lets encrypt
 #---------------------------------------------------------------------------------------
-( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
-( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
-exit 0
 
-sudo apt-get -y install python-letsencrypt-apache #silent installation of letsencrypt
-
-if [ "$PRODUCTIONCERT" = true ] ; then 
-	echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
-	letsencrypt --apache 
+if [ -z "$PRODCERT" ]; then #Check for prodcert
+	echo "Let's encrypt not called, no certificate will be set"
 else
-	echo "Obtaining staging certs (for test)"
-	letsencrypt --apache --staging
+	sudo apt-get -y install python-letsencrypt-apache
+	( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
+	( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
+	
+	if [ $PRODCERT=1 ]; then
+		echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
+		letsencrypt --apache 
+	else
+		echo "Obtaining staging certs (for test)"
+		letsencrypt --apache --staging
+	fi
 fi
 
-
+echo "ALL Done"
