@@ -11,29 +11,31 @@ Automated script to backup wordpress daily or restore from backup
 <h2>Assumptions</h2>
 
 1. Wordpress site is stored on Ubuntu 16.04 or 16.10 (only tested versions) <br>
-2. Apache has been configured properly on the original site <br>
-3. Database is MYSQL and running on the same machine (localhost) <br>
+2. Database is MYSQL and running on the same machine (localhost) <br>
 
-<h2>Usage</h2>
-<h3>Backup Wordpress</h3>
+<h2>To Backup Wordpress:</h2><br>
+git clone https://github.com/keithrozario/WordpressRestore/ <br>
+cd WordpressRestore <br>
+chmod +x *.sh <br><br>
 
-To Backup Wordpress: 
+./setup.sh --dropboxtoken [xxx] --enckey [xxxx] --wpdir [xxx] --wpconfdir [xxx] <br>
+<ul>
+<li><b>--dropboxtoken</b> DROPBOX ACCESS TOKEN <b>[MANDATORY]</b><br>
+The access token for your dropbox account, refer to http://bit.ly/2it95it to get one<br>
+<li><b>--enckey</b> ENCRYPTION KEY FOR BACKUPS <b>[MANDATORY]</b><br>
+A user supplied encryption key to encrypt backups (all filed uploaded to backup dir are encrypted)<br>
+<li><b>--wpdir</b> WORDPRESS DIRECTORY <i>[OPTIONAL]</i><br>
+Directory of the Wordpress installations, defaults to /var/www/html if not supplied<br>
+<li><b>--wpconfdir</b> ENCRYPTION_KEY_FOR_BACKUPS <b>[MANDATORY]</b><br>
+Directory of the Wordpress wp-config.php file, defaults to Wordpress Directory if not supplied<br>
+</ul>
 
-git clone https://github.com/keithrozario/WordpressRestore/
-cd WordpressRestore
-chmod +x *.sh
-./setup.sh --dropboxtoken [x1] --enckey [x2] --wpdir [x3] --wpconfdir [x4]
+<h2>To Restore Wordpress:</h2><br>
+git clone https://github.com/keithrozario/WordpressRestore/ <br>
+cd WordpressRestore <br>
+chmod +x *.sh <br><br>
 
-[x1]: The access token for your dropbox account, refer to http://bit.ly/2it95it to get one<br>
-[x2]: A user supplied encryption key to encrypt backups (all filed uploaded to backup dir are encrypted)<br>
-[x3]: Directory of Wordpress Installation (defaults to /var/www/html)
-[x4]: Directory of Wordpress wp-config.php file (defaults to [x3] if not supplied)
-
-
-
-<h2>Available Commands</h2>
-
-<h3>restoreWP.sh</h3>
+./setup.sh --dbrootpass [xxx] --dropboxtoken [xxx] --enckey [xxxx] --cfemail [xxx] --cfzone [xxx] --cfkey [xxx] --cfrecord [xxx] <br>
 <ul>
 <li><b>--dbrootpass</b> DATABASE_ROOT_PASSWORD <b>[MANDATORY]</b><br>
 The password for root on the database you're about to create, this can be set to anything, but use strong passwords <br>
