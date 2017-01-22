@@ -100,8 +100,8 @@ PRODUCTIONCERT=false
 
 WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
-WPCONFIGFILEENC=wp-config.php
-APACHECONFIG=apachecfg_static.tar
+WPCONFIGFILE=wp-config.php
+APACHECONFIG=apachecfg.tar
 WPSETTINGSFILE=.wpsettings
 WPSETTINGSFILEDIR=/var
 
@@ -134,12 +134,12 @@ GetDropboxUploader $DROPBOXTOKEN
 #Download .wpsettings file
 #---------------------------------------------------------------------------------------
 
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE #Wordpress.sql file
-openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #Wordpress.sql file
+openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
 
 if [ -f $WPSETTINGSFILEDIR/$WPSETTINGSFILE ]; then
 	echo "Loading $WPSETTINGSFILE"
-	source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
+	source "$WPSETTINGSFILEDIR/$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
 else 
 	echo "Unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
     	exit 0
@@ -155,16 +155,52 @@ openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
 openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
+openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
+
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
-	echo "wp-config is in $WPZIPFILE, no further downloads required" 
+	echo "wp-config is in $WPZIPFILE, no further downloads required"
 else
-	echo "wp-config is a separate file, downloading $WPCONFIGFILEENC from Dropbox"
-	/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILEENC #encrypted Wp-config.php file
-	
+	echo "wp-config is a separate file, downloading $WPCONFIGFILE from Dropbox"
+	/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILE.enc #encrypted Wp-config.php file
+	openssl enc -aes-256-cbc -d -in $WPCONFIGFILE.enc -out $WPCONFIGFILE -k $ENCKEY
 fi
 
-###temporary breakpoint
-exit 0
+rm *.enc #remove encrypted files after decryption
+
+#---------------------------------------------------------------------------------------
+# Extracting Wordpress Files
+#---------------------------------------------------------------------------------------
+
+if [ -d $WPDIR ]; then
+echo "Removing older version of $WPDIR"
+rm -r $WPDIR #remove current directory (to avoid conflicts)
+else 
+echo "$WPDIR not found, proceeding to extraction"
+fi
+
+tar -xzf $WPZIPFILE -C $WPDIR .
+rm $WPZIPFILE
+
+if [ "$WPDIR" = "$WPCONFDIR" ]; then
+	echo "wp-config file is part of $WPDIR, no further action required"
+else
+	echo "wp-config is a separate file, moving it to $WPCONFDIR"
+	mv $WPCONFIGFILE $WPCONFDIR
+	echo "wp-config file moved to $WPCONFDIR"
+fi
+
+echo "Wordpress Files extracted"
+
+#---------------------------------------------------------------------------------------
+# Get DB Parameters from wp-config.php
+#---------------------------------------------------------------------------------------
+
+echo "Obtaining configuration parameters from wp-config.php"
+
+WPDBNAME=`cat $WPCONFDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
+WPDBUSER=`cat $WPCONFDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
+WPDBPASS=`cat $WPCONFDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
 
 #---------------------------------------------------------------------------------------
 # Main-Initilization
@@ -189,8 +225,8 @@ mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
 mysql -u root -e "FLUSH PRIVILEGES;"
 
 #Create DB for Wordpress with user------------------------------------------------------
-echo "Creating Database with name $DBNAME"
-mysql -u root -e "CREATE DATABASE IF NOT EXISTS $DBNAME;"
+echo "Creating Database with name $WPDBNAME"
+mysql -u root -e "CREATE DATABASE IF NOT EXISTS $WPDBNAME;"
 echo "Granting Permission to $WPDBUSER with password: $WPDBPASS"
 mysql -u root -e "GRANT ALL ON *.* TO '$WPDBUSER'@'localhost' IDENTIFIED BY '$WPDBPASS';"
 mysql -u root -e "FLUSH PRIVILEGES;"
@@ -202,12 +238,11 @@ chmod 644 /etc/mysql/my.cnf
 mysql wordpress < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
 
 #---------------------------------------------------------------------------------------
-# Apache Setup and Depdencies
+# Apache Setup and Dependencies
 #---------------------------------------------------------------------------------------
 
 sudo apt-get -y install apache2 #non-interactive apache2 install
-
-tar xvf $APACHECONFIG #extract apache2 configuration as downloaded
+tar -xvf $APACHECONFIG -C / #untar to correct location
 sudo service apache2 restart
 
 #---------------------------------------------------------------------------------------
@@ -219,23 +254,12 @@ sudo apt-get -y install libapache2-mod-php
 sudo apt-get -y install php-mcrypt
 sudo apt-get -y install php-mysql
 
-rm -r /var/www #remove current directory (to avoid conflicts)
-tar xzf $WPZIPFILE
-rm $WPZIPFILE
-
-#Decrypt and extract wp-config.php file-------------------------------------------------
-openssl enc -aes-256-cbc -d -in $WPCONFIGFILEENC -out /var/wp-config.php -k $WPCONFPASS 
-rm $WPCONFIGFILEENC
-echo "WPCONFPASS=$WPCONFPASS" > ~/.wpconfpass #store wpconfigpass in config file
-
-sudo service apache2 restart #restart apache for php to take effect
+sudo service apache2 restart
 
 #---------------------------------------------------------------------------------------
-# Download backup script
+# Setup backup script
 #---------------------------------------------------------------------------------------
-mv Backup.sh /var
-( crontab -l ; echo "0 23 * * * /var/Backup.sh" ) | crontab - #cron-job the backup-script
-
+SetCronJob #from functions.sh
 
 #---------------------------------------------------------------------------------------
 # Lets encrypt
