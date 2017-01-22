@@ -246,7 +246,7 @@ sudo apt-get -y install apache2 #non-interactive apache2 install
 echo "Apache Installed, loading Apache configuration"
 tar -xvf $APACHECONFIG -C / #untar to correct location
 sudo service apache2 restart
-exit 0
+
 
 #---------------------------------------------------------------------------------------
 # Wordpress and PHP setup
@@ -263,12 +263,16 @@ sudo service apache2 restart
 # Setup backup script
 #---------------------------------------------------------------------------------------
 SetCronJob #from functions.sh
+SetEncKey $ENCKEY
+ENCKEY=0
+
 
 #---------------------------------------------------------------------------------------
 # Lets encrypt
 #---------------------------------------------------------------------------------------
 ( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
 ( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
+exit 0
 
 sudo apt-get -y install python-letsencrypt-apache #silent installation of letsencrypt
 
