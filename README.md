@@ -32,7 +32,7 @@ Directory of the Wordpress wp-config.php file, defaults to Wordpress Directory i
 *all files are encrypted with --enckey, stored in /var/.enckey. This file isn't backed-up. Don't lose the encryption key!!
 </i><br>
 
-<h2>To Restore Wordpress:</h2><br>
+<h2>To Restore Wordpress:</h2>
 git clone https://github.com/keithrozario/WordpressRestore/ <br>
 cd WordpressRestore <br>
 chmod +x *.sh <br><br>
