@@ -39,7 +39,7 @@ fi
 WPSQLFILE=wordpress.sql.enc #.enc is the encrypted file
 WPZIPFILE=wordpress.tgz.enc #.enc is the encrypted file
 
-APACHECONFIG=apachecfg_dynamic.tar
+APACHECONFIG=apachecfg.tar.enc
 BACKUPPATH=/var/backupWP
 
 # WPDIR=/var/www/html #taken from .wpsettings file
@@ -71,7 +71,7 @@ echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 # Zip $WPDIR folder
 #-------------------------------------------------------------------------
 echo "Zipping the Wordpress Directory in : $WPDIR"
-tar czf $BACKUPPATH/$WPZIPFILE.temp $WPDIR #turn off verbose (it's too noisy!!)
+tar -czf $BACKUPPATH/$WPZIPFILE.temp -C $WPDIR #turn off verbose and don't keep directory structure
 echo "Encrypting TAR file:"
 openssl enc -aes-256-cbc -in $BACKUPPATH/$WPZIPFILE.temp -out $BACKUPPATH/$WPZIPFILE -k $ENCKEY
 rm $BACKUPPATH/$WPZIPFILE.temp
