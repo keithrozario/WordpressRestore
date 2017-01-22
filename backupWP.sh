@@ -61,7 +61,7 @@ WPDBUSER=`cat $WPCONFDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
 WPDBPASS=`cat $WPCONFDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
 
 echo "Dumping MYSQL Files"
-mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE.temp
+mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE
 
 echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 
@@ -69,7 +69,7 @@ echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 # Zip $WPDIR folder
 #-------------------------------------------------------------------------
 echo "Zipping the Wordpress Directory in : $WPDIR"
-tar -czf $BACKUPPATH/$WPZIPFILE -C $WPDIR #turn off verbose and don't keep directory structure
+tar -czf $BACKUPPATH/$WPZIPFILE -C $WPDIR . #turn off verbose and don't keep directory structure
 echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE"
 
 
