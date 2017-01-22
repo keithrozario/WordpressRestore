@@ -25,6 +25,12 @@ DROPBOXUPLOADERFILE=~/.dropbox_uploader
 URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
 DROPBOXPATH=/var/Dropbox-Uploader
 
+if [ -d $DROPBOXPATH ]; then
+  echo "Dropbox downloader may have been downloaded before, removing directory $DROPBOXPATH"
+  rm -r $DROPBOXPATH
+  rm $DROPBOXUPLOADERFILE
+fi  
+  
 echo "Saving Token : $DROPBOXTOKEN to file"
 echo "OAUTH_ACCESS_TOKEN=$DROPBOXTOKEN" > $DROPBOXUPLOADERFILE
 chmod 440 $DROPBOXUPLOADERFILE
