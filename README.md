@@ -1,4 +1,4 @@
-# WordpressRestore
+# WordpressRestore v1.0
 Automated script to backup wordpress daily or restore from backup
 
 <h2>Pre-requisites</h2>
