@@ -53,3 +53,8 @@ A user supplied encryption key to encrypt backups (all filed uploaded to backup 
 <li><b>--cfkey</b> CLOUDFLARE_ACCESS_TOKEN <i>[OPTIONAL]</i><br>
 <i>Optional:</i> Cloudflare access token, refer to http://bit.ly/2hTadAg to get one<br>
 </ul>
+
+<h2>Special Thanks</h2>
+Thanks to <a href="https://github.com/andreafabrizi/Dropbox-Uploader">Andrea Fabrizi</a> for the awesome DropboxUploader script  <br>
+Thanks to <a href="https://gist.github.com/benkulbertis/fff10759c2391b6618dd/">Ben Kulbertis</a> for the awesome Cloudflare update script  <br>
+
