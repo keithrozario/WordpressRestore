@@ -202,6 +202,12 @@ WPDBNAME=`cat $WPCONFDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
 WPDBUSER=`cat $WPCONFDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
 WPDBPASS=`cat $WPCONFDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
 
+echo "WPDBNAME = $WPDBNAME"
+echo "WPDBUSER = $WPDBUSER"
+echo "WPDBPASS = $WPDBPASS"
+
+exit 0
+
 #---------------------------------------------------------------------------------------
 # Main-Initilization
 #---------------------------------------------------------------------------------------
