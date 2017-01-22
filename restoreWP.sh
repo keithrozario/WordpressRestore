@@ -1,5 +1,5 @@
 #!/bin/bash
-# Wordpress Restorer v1.0
+# Wordpress Restorer v1.0 
 # Backups and restores wordpress with one click
 #
 # Author: Keith Rozario <keith@keithrozario.com>
