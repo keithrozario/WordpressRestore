@@ -20,6 +20,19 @@
 #
 # 
 
+#-------------------------------------------------------------------------
+# Check if seetings and functions file exist
+#-------------------------------------------------------------------------
+FUNCTIONSFILE=functions.sh
+if [ -f $FUNCTIONSFILE ]; then
+	echo "Loading $FUNCTIONSFILE"
+	source "$FUNCTIONSFILE" 2>/dev/null #file exist, load variables
+else 
+	echo "Unable to find $FUNCTIONSFILE, please run setup.sh for first time"
+    	exit 0
+fi
+
+
 while [[ $# -gt 1 ]]
 do
 key="$1"
@@ -40,9 +53,6 @@ case $key in
     --wpconfdir)
     WPCONFDIR="$2"
     shift # past argument
-    ;;
-    --default)
-    DEFAULT=YES
     ;;
     *)
             # unknown option
@@ -77,10 +87,6 @@ fi
 # Global Constants
 #---------------------------------------------------------------------------------------
 
-DROPBOXUPLOADERFILE=~/.dropbox_uploader
-URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
-DROPBOXPATH=/var/Dropbox-Uploader
-
 BACKUPSHDIR=/var
 BACKUPSHNAME=backupWP.sh
 WPSETTINGSFILE=$BACKUPSHDIR/.wpsettings
@@ -89,28 +95,27 @@ ENCKEYFILE=$BACKUPSHDIR/.enckey
 #---------------------------------------------------------------------------------------
 # Download DropboxUploader and Setup
 #---------------------------------------------------------------------------------------
-echo "Saving Token : $DROPBOXTOKEN to file"
-echo "OAUTH_ACCESS_TOKEN=$DROPBOXTOKEN" > $DROPBOXUPLOADERFILE
-chmod 440 $DROPBOXUPLOADERFILE
-echo "Downloading DropboxDownloader from $URLDROPBOXDOWNLOADER"
-git clone $URLDROPBOXDOWNLOADER $DROPBOXPATH
-chmod +x $DROPBOXPATH/dropbox_uploader.sh
+GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 
 #---------------------------------------------------------------------------------------
-# Setup Encryption Key file
+# Setup .wpsettings file
 #---------------------------------------------------------------------------------------
+if [ -f "$WPSETTINGSFILE" ]; then
+echo "Deleting old $WPSETTINGSFILE (probably from previous installation)"
 rm $WPSETTINGSFILE
-echo "ENCKEY=$ENCKEY" > $ENCKEYFILE #store wpconfigpass in config file
+fi
+
 echo "WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
 echo "WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
 echo "DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
 
+SetEncKey $ENCKEY #in functions.sh
+
 #---------------------------------------------------------------------------------------
 # Download Backup Script and create CRON job
 #---------------------------------------------------------------------------------------
-chmod 775 $BACKUPSHNAME
-mv $BACKUPSHNAME $BACKUPSHDIR
 
-( crontab -l ; echo "10 * * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
+SetCronJob #in functions.sh
+
 echo "Setup Complete"
 
