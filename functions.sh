@@ -60,10 +60,16 @@ mv $BACKUPSHNAME $BACKUPSHDIR
 #---------------------------------------------------------------------------------------
 
 function SetEncKey {
-
+ENCKEYFILE=/var/.enckey
 ENCKEY=$1
 
-ENCKEYFILE=/var/.enckey
-rm ENCKEYFILE #remove older one if exists
+if [ -f $ENCKEYFILE ]; then
+  echo "Removing old $ENCKEYFILE, (probably from old installation)"
+  rm ENCKEYFILE #remove older one if exists
+else
+  echo "No $ENCKEYFILE found, looks like this is the first install--good!"
+fi
+
+
 echo "ENCKEY=$ENCKEY" > $ENCKEYFILE #store wpconfigpass in config file
 }
