@@ -100,7 +100,7 @@ fi
 if [ -z "$PRODCERT" ]; #Check for Dropboxtoken
 then echo "--prodcert not set, let's encrypt certificate calling switched off"
 else
-	if [ $PRODCERT=1 ]; then
+	if [ $PRODCERT = 1 ]; then
 	echo "--prodcert set to 1, calling Let's Encrypt in Production mode"
 	else
 	echo "--prodcert not set to 1, calling Let's Encrypt in test mode"
