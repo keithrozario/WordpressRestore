@@ -26,23 +26,11 @@ case $key in
     DBPASS="$2"
     shift # past argument
     ;;
-    --dbname)
-    DBNAME="$2"
-    shift # past argument
-    ;;
-    --wpdbuser)
-    WPDBUSER="$2"
-    shift # past argument
-    ;;
-    --wpdbpass)
-    WPDBPASS="$2"
-    shift # past argument
-    ;;
     --dropboxtoken)
     DROPBOXTOKEN="$2"
     shift # past argument
     ;;
-	--wpconfpass)
+    --wpconfpass)
     WPCONFPASS="$2"
     shift # past argument
     ;;
@@ -62,9 +50,6 @@ case $key in
     CFRECORD="$2"
     shift # past argument
     ;;
-    --default)
-    DEFAULT=YES
-    ;;
     *)
             # unknown option
     ;;
@@ -72,18 +57,11 @@ esac
 shift # past argument or value
 done
 
-if [ -z "$DBPASS" ] || [ -z "$DBNAME" ];  #Check DB Parameters
-then echo "Please provide all Database Parameters: --dbpass, --dbname ";
+if [ -z "$DBPASS" ]; then #Check DB Parameters
+echo "Please provide a root password for the Database";
 exit 0
 else
 echo "Database parameteres : Good"
-fi
-
-if [ -z "$WPDBUSER" ] || [ -z "$WPDBPASS" ] || [ -z "$WPCONFPASS" ]; #Check Wordpress Parameters
-then echo "Unable to proceed, insufficient wordpress parameters: --wpdbuser, --wpdbpass & --wpconfpass. Check your wp-config.php file"; 
-exit 0
-else
-echo "Wordpress parameteres : Good"
 fi
 
 if [ -z "$DROPBOXTOKEN" ]; #Check for Dropboxtoken
@@ -110,8 +88,7 @@ WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
 WPCONFIGFILEENC=wp-config.php.enc
 APACHECONFIG=apachecfg_static.tar
-
-URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
+WPSETTINGSFILE=.wpsettings
 
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
@@ -139,17 +116,15 @@ sudo apt-get update
 export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 
-
 #---------------------------------------------------------------------------------------
 # Download backup files from dropbox
 # Special Thanks to AndreaFabrizi https://github.com/andreafabrizi
 #---------------------------------------------------------------------------------------
 
-echo "Saving Token : $DROPBOXTOKEN to file"
-echo "OAUTH_ACCESS_TOKEN=$DROPBOXTOKEN" > ~/.dropbox_uploader
-echo "Downloading DropboxDownloader from $URLDROPBOXDOWNLOADER"
-git clone $URLDROPBOXDOWNLOADER /var/Dropbox-Uploader
-chmod +x /var/Dropbox-Uploader/dropbox_uploader.sh
+GetDropboxUploader $DROPBOXTOKEN
+
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE #Wordpress.sql file
+#WIP: check if WPDIR = WPCONFDIR
 
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE #Wordpress.sql file
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE #zip file with all wordpress contents
