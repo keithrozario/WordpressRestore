@@ -26,7 +26,7 @@ The access token for your dropbox account, refer to http://bit.ly/2it95it to get
 A user supplied encryption key to encrypt backups (all filed uploaded to backup dir are encrypted)<br>
 <li><b>--wpdir</b> WORDPRESS DIRECTORY <i>[OPTIONAL]</i><br>
 Directory of the Wordpress installations, defaults to /var/www/html if not supplied<br>
-<li><b>--wpconfdir</b> ENCRYPTION_KEY_FOR_BACKUPS <b>[MANDATORY]</b><br>
+<li><b>--wpconfdir</b> WORDPRESS CONFIGURATION DIRECTORY <i>[OPTIONAL]</i><br>
 Directory of the Wordpress wp-config.php file, defaults to Wordpress Directory if not supplied<br>
 </ul>
 
