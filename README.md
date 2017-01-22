@@ -55,6 +55,6 @@ A user supplied encryption key to encrypt backups (all filed uploaded to backup 
 </ul>
 
 <h2>Special Thanks</h2>
-Thanks to <a href="https://github.com/andreafabrizi/Dropbox-Uploader">Andrea Fabrizi</a> for the awesome DropboxUploader script  <br>
-Thanks to <a href="https://gist.github.com/benkulbertis/fff10759c2391b6618dd/">Ben Kulbertis</a> for the awesome Cloudflare update script  <br>
+Thanks to <a href="https://github.com/andreafabrizi">Andrea Fabrizi</a> for the awesome <a href="https://github.com/andreafabrizi/Dropbox-Uploader">DropboxUploader script</a>  <br>
+Thanks to <a href="https://gist.github.com/benkulbertis">Ben Kulbertis</a> for the awesome <a href="https://gist.github.com/benkulbertis/fff10759c2391b6618dd/">Cloudflare update script</a>  <br>
 
