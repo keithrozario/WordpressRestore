@@ -52,7 +52,13 @@ A user supplied encryption key to encrypt backups (all filed uploaded to backup 
 <i>Optional:</i> Cloudflare record to update (e.g. www.keithrozario.com)
 <li><b>--cfkey</b> CLOUDFLARE_ACCESS_TOKEN <i>[OPTIONAL]</i><br>
 <i>Optional:</i> Cloudflare access token, refer to http://bit.ly/2hTadAg to get one<br>
+<li><b>--prodcert</b>Production Certificate Flag <i>[OPTIONAL]</i><br>
+<i>Optional:</i> set to 1 for production certificate from Let's Encrypt, 0 for non-prod, leave blank to skip Let's encrypt<br>
 </ul>
+
+*if --prodcert is set to 1, Cronjobs will be creates for letsencrypt renew to run twice a day (6am and 11pm)
+*if --prodcert is set to 0, lets encrypt will call on test certificates, cronjobs will still be created
+*if --prodcert is not set, let's encrypt step is bypassed
 
 <h2>Special Thanks</h2>
 Thanks to <a href="https://github.com/andreafabrizi">Andrea Fabrizi</a> for the awesome <a href="https://github.com/andreafabrizi/Dropbox-Uploader">DropboxUploader script</a>  <br>
