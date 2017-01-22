@@ -140,12 +140,6 @@ openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE -out $WPSETTINGSFILEDIR/$WPSETTI
 if [ -f $WPSETTINGSFILEDIR/$WPSETTINGSFILE ]; then
 	echo "Loading $WPSETTINGSFILE"
 	source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
-	
-	if [ "$WPDIR" = "$WPCONFDIR" ]; then
-		WPSINGLEDIR=True
-	else
-		WPSINGLEDIR=False
-	fi
 else 
 	echo "Unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
     	exit 0
@@ -162,10 +156,11 @@ openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY
 openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
+	echo "wp-config is in $WPZIPFILE, no further downloads required" 
+else
 	echo "wp-config is a separate file, downloading $WPCONFIGFILEENC from Dropbox"
 	/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILEENC #encrypted Wp-config.php file
-else
-	echo "wp-config is in $WPZIPFILE"
+	
 fi
 
 ###temporary breakpoint
