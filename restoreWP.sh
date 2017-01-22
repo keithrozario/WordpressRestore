@@ -179,8 +179,8 @@ else
 echo "$WPDIR not found, proceeding to extraction"
 fi
 
+mkdir -p $WPDIR
 tar -xzf $WPZIPFILE -C $WPDIR .
-rm $WPZIPFILE
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
 	echo "wp-config file is part of $WPDIR, no further action required"
