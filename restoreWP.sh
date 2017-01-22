@@ -100,7 +100,7 @@ PRODUCTIONCERT=false
 
 WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
-WPCONFIGFILEENC=wp-config.php.enc
+WPCONFIGFILEENC=wp-config.php
 APACHECONFIG=apachecfg_static.tar
 WPSETTINGSFILE=.wpsettings
 WPSETTINGSFILEDIR=/var
@@ -174,6 +174,9 @@ if [ "$WPDIR" = "$WPCONFDIR" ]; then
 else
 	echo "wp-config is in $WPZIPFILE"
 fi
+
+###temporary breakpoint
+exit 0
 
 #---------------------------------------------------------------------------------------
 # Install MySQL and Dependencies
