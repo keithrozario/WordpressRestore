@@ -13,6 +13,20 @@
 #
 # 
 
+
+
+#-------------------------------------------------------------------------
+# Check if seetings and functions file exist
+#-------------------------------------------------------------------------
+FUNCTIONSFILE=functions.sh
+if [ -f $FUNCTIONSFILE ]; then
+	echo "Loading $FUNCTIONSFILE"
+	source "$FUNCTIONSFILE" 2>/dev/null #file exist, load variables
+else 
+	echo "Unable to find $FUNCTIONSFILE, please run setup.sh for first time"
+    	exit 0
+fi
+
 #---------------------------------------------------------------------------------------
 # Command line parameters
 #---------------------------------------------------------------------------------------
@@ -30,8 +44,8 @@ case $key in
     DROPBOXTOKEN="$2"
     shift # past argument
     ;;
-    --wpconfpass)
-    WPCONFPASS="$2"
+    --enckey)
+    ENCKEY="$2"
     shift # past argument
     ;;
 	--cfemail)
@@ -89,6 +103,7 @@ WPZIPFILE=wordpress.tgz
 WPCONFIGFILEENC=wp-config.php.enc
 APACHECONFIG=apachecfg_static.tar
 WPSETTINGSFILE=.wpsettings
+WPSETTINGSFILEDIR=/var
 
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
@@ -117,20 +132,49 @@ export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 
 #---------------------------------------------------------------------------------------
-# Download backup files from dropbox
-# Special Thanks to AndreaFabrizi https://github.com/andreafabrizi
+#Setup DropboxUploader
 #---------------------------------------------------------------------------------------
 
 GetDropboxUploader $DROPBOXTOKEN
 
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE #Wordpress.sql file
-#WIP: check if WPDIR = WPCONFDIR
+#---------------------------------------------------------------------------------------
+#Download .wpsettings file
+#---------------------------------------------------------------------------------------
 
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE #Wordpress.sql file
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE #zip file with all wordpress contents
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG #Apache configurations
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILEENC #encrypted Wp-config.php file
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE #Wordpress.sql file
+openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
+
+if [ -f $WPSETTINGSFILEDIR/$WPSETTINGSFILE ]; then
+	echo "Loading $WPSETTINGSFILE"
+	source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
 	
+	if [ "$WPDIR" = "$WPCONFDIR" ]; then
+		WPSINGLEDIR=True
+	else
+		WPSINGLEDIR=False
+	fi
+else 
+	echo "Unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
+    	exit 0
+fi
+
+#---------------------------------------------------------------------------------------
+#Download files from dropbox
+#---------------------------------------------------------------------------------------
+
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
+openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY 
+
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE #zip file with all wordpress contents
+openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
+
+if [ "$WPDIR" = "$WPCONFDIR" ]; then
+	echo "wp-config is a separate file, downloading $WPCONFIGFILEENC from Dropbox"
+	/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILEENC #encrypted Wp-config.php file
+else
+	echo "wp-config is in $WPZIPFILE"
+fi
+
 #---------------------------------------------------------------------------------------
 # Install MySQL and Dependencies
 #---------------------------------------------------------------------------------------
