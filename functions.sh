@@ -49,8 +49,8 @@ function SetCronJob {
 BACKUPSHDIR=/var
 BACKUPSHNAME=backupWP.sh
 
-chmod 775 $BACKUPSHNAME
-mv $BACKUPSHNAME $BACKUPSHDIR
+cp $BACKUPSHNAME $BACKUPSHDIR
+chmod 775 $BACKUPSHDIR/$BACKUPSHNAME
 ( crontab -l ; echo "10 * * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
 
 }
