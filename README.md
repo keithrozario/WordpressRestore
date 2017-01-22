@@ -28,7 +28,7 @@ Directory of the Wordpress installations, defaults to /var/www/html if not suppl
 <li><b>--wpconfdir</b> WORDPRESS CONFIGURATION DIRECTORY <i>[OPTIONAL]</i><br>
 Directory of the Wordpress wp-config.php file, defaults to Wordpress Directory if not supplied<br>
 </ul><br><i>
-*setup.sh automatically setups backups to run once a day, uploading relevant files to Dropbox Directory
+*setup.sh automatically setups backups to run once a day, uploading relevant files to Dropbox Directory <br>
 *all files are encrypted with --enckey, stored in /var/.enckey. This file isn't backed-up. Don't lose the encryption key!!
 </i><br>
 
@@ -55,10 +55,11 @@ A user supplied encryption key to encrypt backups (all filed uploaded to backup 
 <li><b>--prodcert</b>Production Certificate Flag <i>[OPTIONAL]</i><br>
 <i>Optional:</i> set to 1 for production certificate from Let's Encrypt, 0 for non-prod, leave blank to skip Let's encrypt<br>
 </ul>
-
-*if --prodcert is set to 1, Cronjobs will be creates for letsencrypt renew to run twice a day (6am and 11pm)
-*if --prodcert is set to 0, lets encrypt will call on test certificates, cronjobs will still be created
-*if --prodcert is not set, let's encrypt step is bypassed
+<br><i>
+*if --prodcert is set to 1, Cronjobs will be creates for letsencrypt renew to run twice a day (6am and 11pm) <br>
+*if --prodcert is set to 0, lets encrypt will call on test certificates, cronjobs will still be created <br>
+*if --prodcert is not set, let's encrypt step is bypassed <br>
+</i>
 
 <h2>Special Thanks</h2>
 Thanks to <a href="https://github.com/andreafabrizi">Andrea Fabrizi</a> for the awesome <a href="https://github.com/andreafabrizi/Dropbox-Uploader">DropboxUploader script</a>  <br>
