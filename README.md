@@ -17,7 +17,6 @@ Automated script to backup wordpress daily or restore from backup
 git clone https://github.com/keithrozario/WordpressRestore/ <br>
 cd WordpressRestore <br>
 chmod +x *.sh <br><br>
-
 ./setup.sh --dropboxtoken [xxx] --enckey [xxxx] --wpdir [xxx] --wpconfdir [xxx] <br>
 <ul>
 <li><b>--dropboxtoken</b> DROPBOX ACCESS TOKEN <b>[MANDATORY]</b><br>
@@ -28,13 +27,15 @@ A user supplied encryption key to encrypt backups (all filed uploaded to backup 
 Directory of the Wordpress installations, defaults to /var/www/html if not supplied<br>
 <li><b>--wpconfdir</b> WORDPRESS CONFIGURATION DIRECTORY <i>[OPTIONAL]</i><br>
 Directory of the Wordpress wp-config.php file, defaults to Wordpress Directory if not supplied<br>
-</ul>
+</ul><br><i>
+*setup.sh automatically setups backups to run once a day, uploading relevant files to Dropbox Directory
+*all files are encrypted with --enckey, stored in /var/.enckey. This file isn't backed-up. Don't lose the encryption key!!
+</i>
 
 <h2>To Restore Wordpress:</h2><br>
 git clone https://github.com/keithrozario/WordpressRestore/ <br>
 cd WordpressRestore <br>
 chmod +x *.sh <br><br>
-
 ./setup.sh --dbrootpass [xxx] --dropboxtoken [xxx] --enckey [xxxx] --cfemail [xxx] --cfzone [xxx] --cfkey [xxx] --cfrecord [xxx] <br>
 <ul>
 <li><b>--dbrootpass</b> DATABASE_ROOT_PASSWORD <b>[MANDATORY]</b><br>
