@@ -30,7 +30,7 @@ Directory of the Wordpress wp-config.php file, defaults to Wordpress Directory i
 </ul><br><i>
 *setup.sh automatically setups backups to run once a day, uploading relevant files to Dropbox Directory
 *all files are encrypted with --enckey, stored in /var/.enckey. This file isn't backed-up. Don't lose the encryption key!!
-</i>
+</i><br>
 
 <h2>To Restore Wordpress:</h2><br>
 git clone https://github.com/keithrozario/WordpressRestore/ <br>
