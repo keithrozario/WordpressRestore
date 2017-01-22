@@ -202,12 +202,6 @@ WPDBNAME=`cat $WPCONFDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
 WPDBUSER=`cat $WPCONFDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
 WPDBPASS=`cat $WPCONFDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
 
-echo "WPDBNAME = $WPDBNAME"
-echo "WPDBUSER = $WPDBUSER"
-echo "WPDBPASS = $WPDBPASS"
-
-exit 0
-
 #---------------------------------------------------------------------------------------
 # Main-Initilization
 #---------------------------------------------------------------------------------------
@@ -241,15 +235,18 @@ mysql -u root -e "FLUSH PRIVILEGES;"
 chmod 644 /etc/mysql/my.cnf
 
 #Extract mysqlfiles---------------------------------------------------------------------
-mysql wordpress < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
+echo "Loading $WPSQLFILE into database $WPDBNAME"
+mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
 
 #---------------------------------------------------------------------------------------
 # Apache Setup and Dependencies
 #---------------------------------------------------------------------------------------
 
 sudo apt-get -y install apache2 #non-interactive apache2 install
+echo "Apache Installed, loading Apache configuration"
 tar -xvf $APACHECONFIG -C / #untar to correct location
 sudo service apache2 restart
+exit 0
 
 #---------------------------------------------------------------------------------------
 # Wordpress and PHP setup
