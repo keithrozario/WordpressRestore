@@ -285,7 +285,7 @@ else
 	( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
 	( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
 	
-	if [ $PRODCERT=1 ]; then
+	if [ $PRODCERT = 1 ]; then
 		echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
 		letsencrypt --apache 
 	else
