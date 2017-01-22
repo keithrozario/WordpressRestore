@@ -69,25 +69,25 @@ echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 # Zip $WPDIR folder
 #-------------------------------------------------------------------------
 echo "Zipping the Wordpress Directory in : $WPDIR"
-tar -czf $BACKUPPATH/$WPZIPFILE.temp -C $WPDIR #turn off verbose and don't keep directory structure
+tar -czf $BACKUPPATH/$WPZIPFILE -C $WPDIR #turn off verbose and don't keep directory structure
 echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE"
 
 
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
 #-------------------------------------------------------------------------
-tar cvf $BACKUPPATH/$APACHECONFIG.temp /etc/apache2/sites-enabled
-tar -rvf $BACKUPPATH/$APACHECONFIG.temp /etc/apache2/sites-available
-tar -rvf $BACKUPPATH/$APACHECONFIG.temp /etc/apache2/apache2.conf
-tar -rvf $BACKUPPATH/$APACHECONFIG.temp /etc/apache2/ports.conf
+tar cvf $BACKUPPATH/$APACHECONFIG /etc/apache2/sites-enabled
+tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/sites-available
+tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/apache2.conf
+tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ports.conf
 
 #copy the following files only if they exist
 if [ -f /etc/apache2/ssl ]; then
-    tar -rvf $BACKUPPATH/$APACHECONFIG.temp /etc/apache2/ssl
+    tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ssl
 fi
 
 if [ -f /etc/apache2/.htpasswd ]; then
-    tar -rvf $BACKUPPATH/$APACHECONFIG.temp /etc/apache2/.htpasswd
+    tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/.htpasswd
 fi
 
 
