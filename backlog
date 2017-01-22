@@ -1,0 +1,8 @@
++Provide ApacheNO option, to disable loading Apache configurations (and load wordpress files into default Apache Document root)
+
+Testing:
+-So far testing only on DigitalOcean Ubuntu Image, test with Amazon AMI's as well
+-The Goal is to keep this standardize to Ubuntu 16.04 (only!!), but have it work across every Ubuntu image (AWS, LINODE and Digital Ocean)
+
+
+
