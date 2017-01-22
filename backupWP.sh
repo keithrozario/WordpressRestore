@@ -40,6 +40,7 @@ WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
 WPCONFIGFILE=wp-config.php
 APACHECONFIG=apachecfg.tar
+WPSETTINGSFILENAME=.wpsettings
 BACKUPPATH=/var/backupWP
 
 # WPDIR=/var/www/html #taken from .wpsettings file
@@ -114,6 +115,8 @@ else
     echo "wp-config.php file is in the wordpress directory, no separate zipping necessary"
 fi
 
+openssl enc -aes-256-cbc -in $WPSETTINGSFILE -out $BACKUPPATH/$WPSETTINGSFILENAME.enc -k $ENCKEY
+
 #-------------------------------------------------------------------------
 # Upload to Dropbox
 #-------------------------------------------------------------------------
@@ -123,4 +126,4 @@ $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG.enc /
 if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
     $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILE.enc /
 fi
-$DROPBOXPATH/dropbox_uploader.sh upload $WPSETTINGSFILE /
+$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSETTINGSFILENAME.enc /
