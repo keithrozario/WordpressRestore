@@ -65,7 +65,7 @@ ENCKEY=$1
 
 if [ -f $ENCKEYFILE ]; then
   echo "Removing old $ENCKEYFILE, (probably from old installation)"
-  rm ENCKEYFILE #remove older one if exists
+  rm $ENCKEYFILE #remove older one if exists
 else
   echo "No $ENCKEYFILE found, looks like this is the first install--good!"
 fi
