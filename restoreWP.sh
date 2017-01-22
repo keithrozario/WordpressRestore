@@ -123,13 +123,6 @@ else
 	
 fi
 
-#---------------------------------------------------------------------------------------
-# Main-Initilization
-#---------------------------------------------------------------------------------------
-
-sudo apt-get update 
-export DEBIAN_FRONTEND=noninteractive #Silence all interactions
-
 
 #---------------------------------------------------------------------------------------
 #Setup DropboxUploader
@@ -165,7 +158,7 @@ fi
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
 openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY 
 
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE #zip file with all wordpress contents
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
 openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
@@ -177,6 +170,13 @@ fi
 
 ###temporary breakpoint
 exit 0
+
+#---------------------------------------------------------------------------------------
+# Main-Initilization
+#---------------------------------------------------------------------------------------
+
+sudo apt-get update 
+export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 #---------------------------------------------------------------------------------------
 # Install MySQL and Dependencies
