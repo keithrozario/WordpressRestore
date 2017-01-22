@@ -13,7 +13,7 @@ Automated script to backup wordpress daily or restore from backup
 1. Wordpress site is stored on Ubuntu 16.04 or 16.10 (only tested versions) <br>
 2. Database is MYSQL and running on the same machine (localhost) <br>
 
-<h2>To Backup Wordpress:</h2><br>
+<h2>To Backup Wordpress:</h2>
 git clone https://github.com/keithrozario/WordpressRestore/ <br>
 cd WordpressRestore <br>
 chmod +x *.sh <br><br>
