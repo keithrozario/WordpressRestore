@@ -1,4 +1,10 @@
-+Provide ApacheNO option, to disable loading Apache configurations (and load wordpress files into default Apache Document root)
++Provide ApacheNO option for backup, to disable backing up Apache configurations
++Provide ApacheNO option for restore, to disable loading Apache configurations (and load wordpress files into default Apache Document root)
+  +Still looking for a good & secure defaut apache conf files
++Make DBROOTPASS optional using pwdgen to generate one
++IPTables configuration as part of build (uncomplicated firewall)
++Swap file setting as part of build (additional 1GB by default)
+
 
 Testing:
 -So far testing only on DigitalOcean Ubuntu Image, test with Amazon AMI's as well
