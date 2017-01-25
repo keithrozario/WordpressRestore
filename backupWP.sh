@@ -43,6 +43,7 @@ WPZIPFILE=wordpress.tgz
 WPCONFIGFILE=wp-config.php
 APACHECONFIG=apachecfg.tar
 WPSETTINGSFILENAME=.wpsettings
+APACHEDIR=/etc/apache2
 BACKUPPATH=/var/backupWP
 
 # WPDIR=/var/www/html #taken from .wpsettings file
@@ -79,20 +80,7 @@ echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE"
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
 #-------------------------------------------------------------------------
-tar cvf $BACKUPPATH/$APACHECONFIG /etc/apache2/sites-enabled
-tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/sites-available
-tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/apache2.conf
-tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ports.conf
-
-#copy the following files only if they exist
-if [ -f /etc/apache2/ssl ]; then
-    tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/ssl
-fi
-
-if [ -f /etc/apache2/.htpasswd ]; then
-    tar -rvf $BACKUPPATH/$APACHECONFIG /etc/apache2/.htpasswd
-fi
-
+tar czf $BACKUPPATH/$APACHECONFIG $APACHEDIR
 
 #-------------------------------------------------------------------------
 # Encrypting files before uploading
