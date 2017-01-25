@@ -54,8 +54,13 @@ BACKUPPATH=/var/backupWP
 #-------------------------------------------------------------------------
 # Delete Previous files if they exist (ensure idempotency)
 #-------------------------------------------------------------------------
-rm -r $BACKUPPATH
+if [ -d $BACKUPPATH ]; then
+echo "Removing older version of $BACKUPPAT"
+rm -r $BACKUPPATH #remove current directory (to avoid conflicts)
 mkdir $BACKUPPATH
+else 
+echo "$BACKUPPATH not found, proceeding to extraction"
+fi
 
 #-------------------------------------------------------------------------
 # mysqldump the MYSQL Database
