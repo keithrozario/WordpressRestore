@@ -59,7 +59,8 @@ echo "Removing older version of $BACKUPPAT"
 rm -r $BACKUPPATH #remove current directory (to avoid conflicts)
 mkdir $BACKUPPATH
 else 
-echo "$BACKUPPATH not found, proceeding to extraction"
+echo "$BACKUPPATH not found, creating path"
+mkdir $BACKUPPATH
 fi
 
 #-------------------------------------------------------------------------
