@@ -76,8 +76,9 @@ shift # past argument or value
 done
 
 if [ -z "$DBPASS" ]; then #Check DB Parameters
-echo "Please provide a root password for the Database";
-exit 0
+echo "DB Password note provided...creating one using pwgen"
+sudo apt install pwgen
+DBPASS="$(pwgen -1 -s 64)"
 else
 echo "Database parameteres : Good"
 fi
@@ -117,6 +118,7 @@ WPCONFIGFILE=wp-config.php
 APACHECONFIG=apachecfg.tar
 WPSETTINGSFILE=.wpsettings
 WPSETTINGSFILEDIR=/var
+
 
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
