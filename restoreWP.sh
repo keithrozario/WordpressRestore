@@ -290,8 +290,8 @@ else
 		echo "wp-config.php moved"
 	fi
 	
-	####Setings WP Settings File###
-	SetWPSettings $DEFAULTAPACHEROOT $DEFAULTAPACHEROOT $DEFAULTDROPBOXPATH
+	rm $APACHECONFIG #delete downloaded apache config--that wasn't restored
+	SetWPSettings $DEFAULTAPACHEROOT $DEFAULTAPACHEROOT $DEFAULTDROPBOXPATH #Create new .wpsettings file
 fi
 
 sudo service apache2 restart
@@ -334,4 +334,26 @@ else
 	fi
 fi
 
-echo "ALL Done"
+#---------------------------------------------------------------------------------------
+# Swap File creation (1GB) thanks to peteris.rocks for this code: http://bit.ly/2kf7KQm
+#---------------------------------------------------------------------------------------
+
+sudo fallocate -l 1G /swapfile
+sudo chmod 0600 /swapfile
+sudo mkswap /swapfile
+sudo swapon /swapfile
+echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
+
+#---------------------------------------------------------------------------------------
+# Setup uncomplicated firewall rules for SSH, Http and Https: http://bit.ly/2kf7KQm
+#---------------------------------------------------------------------------------------
+sudo ufw default deny incoming
+sudo ufw allow ssh
+sudo ufw allow http
+sudo ufw allow https
+echo y | sudo ufw enable
+
+#---------------------------------------------------------------------------------------
+# All Done
+#---------------------------------------------------------------------------------------
+echo "All Done"
