@@ -68,6 +68,9 @@ case $key in
     PRODCERT="$2"
     shift # past argument
     ;;
+    --apacherestore)
+    APACHERESTORE=YES
+    ;;
     *)
             # unknown option
     ;;
@@ -76,7 +79,7 @@ shift # past argument or value
 done
 
 if [ -z "$DBPASS" ]; then #Check DB Parameters
-echo "DB Password note provided...creating one using pwgen"
+echo "DB Password not provided...creating one using pwgen"
 sudo apt install pwgen
 DBPASS="$(pwgen -1 -s 64)"
 else
@@ -108,6 +111,12 @@ else
 	fi
 fi
 
+if [ -z "$APACHERESTORE" ]; #Check for Dropboxtoken
+then echo "Apache Settings will be restored from backup"
+else
+echo "Apache Settings will be set to default"
+fi
+
 #---------------------------------------------------------------------------------------
 # Global Constants
 #---------------------------------------------------------------------------------------
@@ -119,6 +128,8 @@ APACHECONFIG=apachecfg.tar
 WPSETTINGSFILE=.wpsettings
 WPSETTINGSFILEDIR=/var
 
+DEFAULTAPACHEROOT=/var/www/html
+DEFAULTDROPBOXPATH=/var/Dropbox-Uploader
 
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
@@ -143,16 +154,21 @@ GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 #---------------------------------------------------------------------------------------
 #Download .wpsettings file
 #---------------------------------------------------------------------------------------
+if [ -z "$APACHERESTORE" ]; then
 
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #Wordpress.sql file
-openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
+	/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
+	openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
 
-if [ -f $WPSETTINGSFILEDIR/$WPSETTINGSFILE ]; then
-	echo "Loading $WPSETTINGSFILE"
-	source "$WPSETTINGSFILEDIR/$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
-else 
-	echo "Unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
-    	exit 0
+	if [ -f $WPSETTINGSFILEDIR/$WPSETTINGSFILE ]; then
+		echo "Loading $WPSETTINGSFILE"
+		source "$WPSETTINGSFILEDIR/$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
+	else 
+		echo "Unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
+		exit 0
+	fi
+
+else
+	SetWPSettings $DEFAULTAPACHEROOT $DEFAULTAPACHEROOT $DEFAULTDROPBOXPATH
 fi
 
 #---------------------------------------------------------------------------------------
@@ -165,8 +181,12 @@ openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
 openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
-openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
+if [ -z "$APACHERESTORE" ]; then
+	/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
+	openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
+else
+	echo "Skipping download of Apache Configurations"
+fi
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
 	echo "wp-config is in $WPZIPFILE, no further downloads required"
@@ -253,8 +273,14 @@ mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly
 #---------------------------------------------------------------------------------------
 
 sudo apt-get -y install apache2 #non-interactive apache2 install
-echo "Apache Installed, loading Apache configuration"
-tar -xvf $APACHECONFIG -C / #untar to correct location
+
+if [ -z "$APACHERESTORE" ]; then
+	echo "Apache Installed, loading Apache configuration"
+	tar -xvf $APACHECONFIG -C / #untar to correct location
+else
+	echo "Skipping restoration of Apache configuration"
+fi
+
 sudo service apache2 restart
 
 
