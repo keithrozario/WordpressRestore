@@ -220,9 +220,9 @@ echo "Wordpress Files extracted"
 
 echo "Obtaining configuration parameters from wp-config.php"
 
-WPDBNAME=`cat $WPCONFDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
-WPDBUSER=`cat $WPCONFDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
-WPDBPASS=`cat $WPCONFDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
+WPDBNAME=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_NAME | cut -d \' -f 4`
+WPDBUSER=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_USER | cut -d \' -f 4`
+WPDBPASS=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_PASSWORD | cut -d \' -f 4`
 
 #---------------------------------------------------------------------------------------
 # Main-Initilization
@@ -286,7 +286,7 @@ else
 		echo "wp-config.php already part of $WPDIR"
 	else
 		echo "moving wp-config.php to $DEFAULTAPACHEROOT"
-		mv $WPCONFDIR/wp-config.php $DEFAULTAPACHEROOT
+		mv $WPCONFDIR/$WPCONFIGFILE $DEFAULTAPACHEROOT
 		echo "wp-config.php moved"
 	fi
 	
