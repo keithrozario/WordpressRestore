@@ -154,22 +154,17 @@ GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 #---------------------------------------------------------------------------------------
 #Download .wpsettings file
 #---------------------------------------------------------------------------------------
-if [ -z "$APACHERESTORE" ]; then
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
+openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
 
-	/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
-	openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
-
-	if [ -f $WPSETTINGSFILEDIR/$WPSETTINGSFILE ]; then
-		echo "Loading $WPSETTINGSFILE"
-		source "$WPSETTINGSFILEDIR/$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
-	else 
-		echo "Unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
-		exit 0
-	fi
-
-else
-	SetWPSettings $DEFAULTAPACHEROOT $DEFAULTAPACHEROOT $DEFAULTDROPBOXPATH
+if [ -f $WPSETTINGSFILEDIR/$WPSETTINGSFILE ]; then
+	echo "Loading $WPSETTINGSFILE"
+	source "$WPSETTINGSFILEDIR/$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
+else 
+	echo "Unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
+	exit 0
 fi
+
 
 #---------------------------------------------------------------------------------------
 #Download files from dropbox
@@ -181,12 +176,9 @@ openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
 openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
-if [ -z "$APACHERESTORE" ]; then
-	/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
-	openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
-else
-	echo "Skipping download of Apache Configurations"
-fi
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
+openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
+
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
 	echo "wp-config is in $WPZIPFILE, no further downloads required"
@@ -279,10 +271,30 @@ if [ -z "$APACHERESTORE" ]; then
 	tar -xvf $APACHECONFIG -C / #untar to correct location
 else
 	echo "Skipping restoration of Apache configuration"
+	echo "Moving Wordpress Install into default DocumentRoot : $DEFAULTAPACHEROOT"
+	####Moving Wordpress Directory to Default Apache Root####
+	if [ $WPDIR = "$DEFAULTAPACHEROOT" ]; then
+	echo "Wordpress already extracted to $DEFAULTAPACHEROOT"
+	else
+		echo "Moving $WPDIR to $DEFAULTAPACHEROOT as part of default Apache setting"
+		mkdir $DEFAULTAPACHEROOT
+		mv $WPDIR $DEFAULTAPACHEROOT
+		echo "Wordpress Directory moved"
+	fi
+	####Moving wp-config.php to Default Apache Root ####
+	if [ "$WPDIR" = "$WPCONFDIR" ]; then
+		echo "wp-config.php already part of $WPDIR"
+	else
+		echo "moving wp-config.php to $DEFAULTAPACHEROOT"
+		mv $WPCONFDIR/wp-config.php $DEFAULTAPACHEROOT
+		echo "wp-config.php moved"
+	fi
+	
+	####Setings WP Settings File###
+	SetWPSettings $DEFAULTAPACHEROOT $DEFAULTAPACHEROOT $DEFAULTDROPBOXPATH
 fi
 
 sudo service apache2 restart
-
 
 #---------------------------------------------------------------------------------------
 # Wordpress and PHP setup
