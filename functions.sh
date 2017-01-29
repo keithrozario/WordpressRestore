@@ -73,3 +73,24 @@ fi
 
 echo "ENCKEY=$ENCKEY" > $ENCKEYFILE #store wpconfigpass in config file
 }
+
+#---------------------------------------------------------------------------------------
+# setup .wpsettings file
+#---------------------------------------------------------------------------------------
+
+function SetWPSettings {
+WPSETTINGSFILE = /var/.wpsettings
+WPDIR=$1
+WPCONFDIR=$2
+DROPBOXPATH=$3
+
+if [ -f $WPSETTINGSFILE ]; then
+	echo "Older $WPSETTINGSFILE detected, deleting it" 
+	rm $WPSETTINGSFILE
+else 
+	echo "Good: no $WPSETTINGSFILE found --- creating one"
+  echo "WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
+  echo "WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
+  echo "DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
+fi
+}
