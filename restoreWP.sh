@@ -68,6 +68,10 @@ case $key in
     PRODCERT="$2"
     shift # past argument
     ;;
+    --domain)
+    DOMAIN="$2"
+    shift # past argument
+    ;;
     --apacherestore)
     APACHERESTORE=YES
     ;;
@@ -112,7 +116,12 @@ else
 fi
 
 if [ -z "$APACHERESTORE" ]; #Check for Dropboxtoken
-then echo "Apache Settings will be restored from backup"
+then echo "Apache Settings will be set to default values"
+	if [ -z "$DOMAIN" ];
+	then echo "No Domain provided, unable to proceed. Either set --apacherestore or provide a --domain"
+	else
+	echo "Apache Domain set to $DOMAIN"
+	fi
 else
 echo "Apache Settings will be set to default"
 fi
@@ -128,8 +137,11 @@ APACHECONFIG=apachecfg.tar
 WPSETTINGSFILE=.wpsettings
 WPSETTINGSFILEDIR=/var
 
-DEFAULTAPACHEROOT=/var/www/html
 DEFAULTDROPBOXPATH=/var/Dropbox-Uploader
+
+SITESAVAILABLEDIR=/etc/apache2/sites-available
+DEFAULAPACHECONF=000-default.conf
+8SPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spaces
 
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
@@ -270,31 +282,19 @@ if [ -z "$APACHERESTORE" ]; then
 	echo "Apache Installed, loading Apache configuration"
 	tar -xvf $APACHECONFIG -C / #untar to correct location
 else
-	echo "Skipping restoration of Apache configuration"
-	echo "Moving Wordpress Install into default DocumentRoot : $DEFAULTAPACHEROOT"
-	####Moving Wordpress Directory to Default Apache Root####
-	if [ $WPDIR = "$DEFAULTAPACHEROOT" ]; then
-	echo "Wordpress already extracted to $DEFAULTAPACHEROOT"
-	else
-		echo "Moving $WPDIR to $DEFAULTAPACHEROOT as part of default Apache setting"
-		mkdir $DEFAULTAPACHEROOT
-		mv $WPDIR $DEFAULTAPACHEROOT
-		echo "Wordpress Directory moved"
-	fi
-	####Moving wp-config.php to Default Apache Root ####
-	if [ "$WPDIR" = "$WPCONFDIR" ]; then
-		echo "wp-config.php already part of $WPDIR"
-	else
-		echo "moving wp-config.php to $DEFAULTAPACHEROOT"
-		mv $WPCONFDIR/$WPCONFIGFILE $DEFAULTAPACHEROOT
-		echo "wp-config.php moved"
-	fi
-	
-	rm $APACHECONFIG #delete downloaded apache config--that wasn't restored
-	SetWPSettings $DEFAULTAPACHEROOT $DEFAULTAPACHEROOT $DEFAULTDROPBOXPATH #Create new .wpsettings file
+	Echo "Copying 000-default config for $DOMAIN.conf"
+	cp $SITESAVAILABLEDIR/DEFAULAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
+	echo "Updating $DOMAIN.conf"
+	sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
+	sed -i '/ServerAdmin*/aServerName $DOMAIN' $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerName setting
+	sed -i '/ServerAdmin*/aServerAlias $DOMAIN' $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
+	sed -i 's|\(^ServerName*\)|$8SPACES\1|' $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sed -i 's|\(^ServerAlias*\)|$8SPACES\1|' $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	echo "Enabling $Domain on Apache"
+	a2ensite $DOMAIN
 fi
 
-sudo service apache2 restart
+sudo service apache2 reload
 
 #---------------------------------------------------------------------------------------
 # Wordpress and PHP setup
@@ -315,26 +315,6 @@ SetEncKey $ENCKEY
 ENCKEY=0 #for security reasons set back to 0
 
 #---------------------------------------------------------------------------------------
-# Lets encrypt
-#---------------------------------------------------------------------------------------
-
-if [ -z "$PRODCERT" ]; then #Check for prodcert
-	echo "Let's encrypt not called, no certificate will be set"
-else
-	sudo apt-get -y install python-letsencrypt-apache
-	( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
-	( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
-	
-	if [ $PRODCERT = 1 ]; then
-		echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
-		letsencrypt --apache 
-	else
-		echo "Obtaining staging certs (for test)"
-		letsencrypt --apache --staging
-	fi
-fi
-
-#---------------------------------------------------------------------------------------
 # Swap File creation (1GB) thanks to peteris.rocks for this code: http://bit.ly/2kf7KQm
 #---------------------------------------------------------------------------------------
 
@@ -352,6 +332,29 @@ sudo ufw allow ssh
 sudo ufw allow http
 sudo ufw allow https
 echo y | sudo ufw enable
+
+#---------------------------------------------------------------------------------------
+# Lets encrypt
+#---------------------------------------------------------------------------------------
+
+#Future Feature to ping $Domain and check if IP=this machine, only then proceed
+#While possible to do this automatically, I prefer to use letsencrypt supported script
+
+if [ -z "$PRODCERT" ]; then #Check for prodcert
+	echo "Let's encrypt not called, no certificate will be set"
+else
+	sudo apt-get -y install python-letsencrypt-apache
+	( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
+	( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
+	
+	if [ $PRODCERT = 1 ]; then
+		echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
+		letsencrypt --apache 
+	else
+		echo "Obtaining staging certs (for test)"
+		letsencrypt --apache --staging
+	fi
+fi
 
 #---------------------------------------------------------------------------------------
 # All Done
