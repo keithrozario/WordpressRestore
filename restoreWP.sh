@@ -140,7 +140,7 @@ WPSETTINGSFILEDIR=/var
 DEFAULTDROPBOXPATH=/var/Dropbox-Uploader
 
 SITESAVAILABLEDIR=/etc/apache2/sites-available
-DEFAULAPACHECONF=000-default.conf
+DEFAULTAPACHECONF=000-default.conf
 8SPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spaces
 
 #---------------------------------------------------------------------------------------
@@ -283,7 +283,7 @@ if [ -z "$APACHERESTORE" ]; then
 	echo "### WARNING: Apache config files will not be secured ###
 	echo "### Consider modifying the config files post-install ###
 	Echo "Copying 000-default config for $DOMAIN.conf"
-	cp $SITESAVAILABLEDIR/DEFAULAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
+	cp $SITESAVAILABLEDIR/$DEFAULTAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
 	echo "Updating $DOMAIN.conf"
 	sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
 	sed -i '/ServerAdmin*/aServerName $DOMAIN' $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerName setting
