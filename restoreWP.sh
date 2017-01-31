@@ -279,9 +279,9 @@ mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly
 sudo apt-get -y install apache2 #non-interactive apache2 install
 
 if [ -z "$APACHERESTORE" ]; then
-	echo "Apache Installed, loading Apache configuration"
-	tar -xvf $APACHECONFIG -C / #untar to correct location
-else
+	echo "Setting up Apache default values"
+	echo "### WARNING: Apache config files will not be secured ###
+	echo "### Consider modifying the config files post-install ###
 	Echo "Copying 000-default config for $DOMAIN.conf"
 	cp $SITESAVAILABLEDIR/DEFAULAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
 	echo "Updating $DOMAIN.conf"
@@ -292,6 +292,11 @@ else
 	sed -i 's|\(^ServerAlias*\)|$8SPACES\1|' $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
 	echo "Enabling $Domain on Apache"
 	a2ensite $DOMAIN
+	
+	rm $APACHECONFIG #remove downloaded Apache configurations
+else
+	echo "Apache Installed, loading Apache configuration"
+	tar -xvf $APACHECONFIG -C / #untar to correct location
 fi
 
 sudo service apache2 reload
