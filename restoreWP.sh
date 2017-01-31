@@ -141,7 +141,8 @@ DEFAULTDROPBOXPATH=/var/Dropbox-Uploader
 
 SITESAVAILABLEDIR=/etc/apache2/sites-available
 DEFAULTAPACHECONF=000-default.conf
-8SPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spaces
+EIGHTSPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spaces
+
 
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
@@ -286,11 +287,11 @@ if [ -z "$APACHERESTORE" ]; then
 	cp $SITESAVAILABLEDIR/$DEFAULTAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
 	echo "Updating $DOMAIN.conf"
 	sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
-	sed -i '/ServerAdmin*/aServerName $DOMAIN' $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerName setting
-	sed -i '/ServerAdmin*/aServerAlias $DOMAIN' $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
-	sed -i 's|\(^ServerName*\)|$8SPACES\1|' $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i 's|\(^ServerAlias*\)|$8SPACES\1|' $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	echo "Enabling $Domain on Apache"
+	sed -i "/ServerAdmin*/aServerName $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerName setting
+	sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
+	sed -i "s|\(^ServerName*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sed -i "s|\(^ServerAlias*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	echo "Enabling $DOMAIN on Apache"
 	a2ensite $DOMAIN
 	
 	rm $APACHECONFIG #remove downloaded Apache configurations
