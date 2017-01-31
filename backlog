@@ -1,9 +1,14 @@
-+Provide ApacheNO option for backup, to disable backing up Apache configurations
-+Provide ApacheNO option for restore, to disable loading Apache configurations (and load wordpress files into default Apache Document root)
-  +Still looking for a good & secure defaut apache conf files
-+IPTables configuration as part of build (uncomplicated firewall)
-+Swap file setting as part of build (additional 1GB by default)
++Need to add the following block to the apache .conf file, if creating from scratch, to enable permalinks:
+  	<Directory /var/www>
+        AllowOverride All
+        Order allow,deny
+        allow from all
+       </Directory>
 
+[side note] the older .htaccess file in production still has older W3 Cache rewrite rules--remove them
+[side note] wp-login.php forces to ssl (in wp-login.php script itself)--you'll need to enable ssl if you want to logon
+
+Almost there--as always! :)
 
 Testing:
 -So far testing only on DigitalOcean Ubuntu Image, test with Amazon AMI's as well
