@@ -211,7 +211,7 @@ if [ -d $WPDIR ]; then
 echo "Removing older version of $WPDIR"
 rm -r $WPDIR #remove current directory (to avoid conflicts)
 else 
-echo "$WPDIR not found, proceeding to extraction"
+echo "Good: $WPDIR not found, proceeding to extraction"
 fi
 
 mkdir -p $WPDIR
@@ -280,17 +280,28 @@ mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly
 sudo apt-get -y install apache2 #non-interactive apache2 install
 
 if [ -z "$APACHERESTORE" ]; then
+	
 	echo "Setting up Apache default values"
 	echo "### WARNING: Apache config files will not be secured ###
 	echo "### Consider modifying the config files post-install ###
 	Echo "Copying 000-default config for $DOMAIN.conf"
 	cp $SITESAVAILABLEDIR/$DEFAULTAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
 	echo "Updating $DOMAIN.conf"
-	sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
+	
 	sed -i "/ServerAdmin*/aServerName $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerName setting
 	sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
+	sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
+	sed -i "/DocumentRoot*/a<Directory $WPDIR>\nAllowOverride All\nOrder allow,deny\nallow from all\n</Directory>" $SITESAVAILABLEDIR/$DOMAIN.conf
+	sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
+	
 	sed -i "s|\(^ServerName*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
 	sed -i "s|\(^ServerAlias*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sed -i "s|\(^<Directory*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sed -i "s|\(^AllowOverride*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sed -i "s|\(^Order*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sed -i "s|\(^allow*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sed -i "s|\(^</Directory*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	
 	echo "Enabling $DOMAIN on Apache"
 	a2ensite $DOMAIN
 	
