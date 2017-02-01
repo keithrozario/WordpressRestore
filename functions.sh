@@ -49,6 +49,8 @@ function SetCronJob {
 BACKUPSHDIR=/var
 BACKUPSHNAME=backupWP.sh
 
+echo "INFO: Setting cronjobs for $BACKUPSHNAME in $BACKUPSHDIR"
+
 cp $BACKUPSHNAME $BACKUPSHDIR
 chmod 775 $BACKUPSHDIR/$BACKUPSHNAME
 ( crontab -l ; echo "* 23 * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
@@ -64,10 +66,11 @@ ENCKEYFILE=/var/.enckey
 ENCKEY=$1
 
 if [ -f $ENCKEYFILE ]; then
-  echo "Removing old $ENCKEYFILE, (probably from old installation)"
+  echo "WARNING: Removing old $ENCKEYFILE, (probably from old installation)"
   rm $ENCKEYFILE #remove older one if exists
+  echo "INFO: $ENCKEYFILE removed"
 else
-  echo "No $ENCKEYFILE found, looks like this is the first install--good!"
+  echo "GOOD: No $ENCKEYFILE found, looks like this is the first install"
 fi
 
 
@@ -85,10 +88,10 @@ WPCONFDIR=$2
 DROPBOXPATH=$3
 
 if [ -f $WPSETTINGSFILE ]; then
-	echo "Older $WPSETTINGSFILE detected, deleting it" 
+	echo "WARNING: Older $WPSETTINGSFILE detected, deleting it" 
 	rm $WPSETTINGSFILE
 else 
-	echo "Good: no $WPSETTINGSFILE found --- creating one"
+	echo "GOOD: no $WPSETTINGSFILE found --- creating one"
   echo "WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
   echo "WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
   echo "DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
