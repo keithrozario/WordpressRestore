@@ -303,13 +303,17 @@ sudo apt-get -y install apache2 >>log.txt 2>&1 #non-interactive apache2 install
 
 if [ $APRESTORE = 1 ]; then
 	
-	echo "Setting up Apache default values"
+	echo "GOOD: Apache Installed, loading Apache configuration"
+	tar -xvf $APACHECONFIG -C / #untar to correct location
+
+else
+	echo "INFO: Setting up Apache default values"
 	echo "### WARNING: Apache config files will not be secured ###"
 	echo "### Consider modifying the config files post-install ###"
-	echo "Copying 000-default config for $DOMAIN.conf"
+	echo "INFO: Copying 000-default config for $DOMAIN.conf"
 	cp $SITESAVAILABLEDIR/$DEFAULTAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
 	
-	echo "Updating $DOMAIN.conf"	
+	echo "INFO: Updating $DOMAIN.conf"	
 	sed -i "/ServerAdmin*/aServerName $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerName setting
 	sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
 	sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
@@ -326,14 +330,11 @@ if [ $APRESTORE = 1 ]; then
 	sed -i "s|\(^</Directory*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
 	sed -i '/#.*/ d' temp.conf #remove all comments in file (nice & clean!)
 	
-	echo "Enabling $DOMAIN on Apache"
+	echo "INFO: Enabling $DOMAIN on Apache"
 	a2ensite $DOMAIN	
-	rm $APACHECONFIG #remove downloaded Apache configurations
-else
-	echo "Apache Installed, loading Apache configuration"
-	tar -xvf $APACHECONFIG -C / #untar to correct location
 fi
 
+rm $APACHECONFIG #remove downloaded Apache configurations
 sudo a2enmod rewrite #enable rewrite for permalinks to work
 sudo service apache2 reload
 
@@ -353,6 +354,8 @@ sudo service apache2 restart
 #---------------------------------------------------------------------------------------
 # Setup backup script & Cron jobs
 #---------------------------------------------------------------------------------------
+echo -e "\\n\\n######### Setting CRON Job, Swap File and Firewall #########\\n\\n"
+
 SetCronJob #from functions.sh
 SetEncKey $ENCKEY
 ENCKEY=0 #for security reasons set back to 0
@@ -386,6 +389,7 @@ echo y | sudo ufw enable
 if [ -z "$PRODCERT" ]; then #Check for prodcert
 	echo "Let's encrypt not called, no certificate will be set"
 else
+	echo -e "\\n\\n######### Getting Certs #########\\n\\n"
 	sudo apt-get -y install python-letsencrypt-apache
 	( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
 	( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
