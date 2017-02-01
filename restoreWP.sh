@@ -124,7 +124,7 @@ then echo "Apache Settings will be set to default values"
 	echo "Apache Domain set to $DOMAIN"
 	fi
 else
-echo "Apache Settings will be set to default"
+echo "Apache Settings will restored from backup"
 fi
 
 #---------------------------------------------------------------------------------------
