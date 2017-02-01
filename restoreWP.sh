@@ -146,12 +146,13 @@ echo -e "######### COMMAND LINE PARAMETERS END #########\\n\\n"
 WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
 WPCONFIGFILE=wp-config.php
-APACHECONFIG=apachecfg.tar
 WPSETTINGSFILE=.wpsettings
 WPSETTINGSFILEDIR=/var
 
 DEFAULTDROPBOXPATH=/var/Dropbox-Uploader
 
+APACHECONFIG=apachecfg.tar
+APACHEDIR=/etc/apache2
 SITESAVAILABLEDIR=/etc/apache2/sites-available
 DEFAULTAPACHECONF=000-default.conf
 EIGHTSPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spaces
@@ -300,11 +301,14 @@ mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly
 
 echo "INFO: Installing Apache2"
 sudo apt-get -y install apache2 >>log.txt 2>&1 #non-interactive apache2 install
+echo "GOOD: Apache Installed, loading Apache configuration"
 
 if [ $APRESTORE = 1 ]; then
-	
-	echo "GOOD: Apache Installed, loading Apache configuration"
-	tar -xvf $APACHECONFIG -C / #untar to correct location
+	echo "INFO: Stopping Apache Service to load configurations"
+	sudo service apache2 stop
+	echo "INFO: Removing configurations file--to prevent conflicts"
+	rm -r $APACHEDIR
+	tar -xvf $APACHECONFIG -C $APACHEDIR #untar to correct location
 
 else
 	echo "INFO: Setting up Apache default values"
