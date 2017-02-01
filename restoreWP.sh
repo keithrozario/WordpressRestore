@@ -296,20 +296,33 @@ echo "INFO: Loading $WPSQLFILE into database $WPDBNAME"
 mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
 
 #---------------------------------------------------------------------------------------
-# Apache Setup and Dependencies
+# Basic Apache and PHP Installations
 #---------------------------------------------------------------------------------------
 
 echo "INFO: Installing Apache2"
 sudo apt-get -y install apache2 >>log.txt 2>&1 #non-interactive apache2 install
-echo "GOOD: Apache Installed, loading Apache configuration"
+echo "GOOD: Apache Installed"
+
+echo "INFO: Installing PHP and libapache2-mod-php"
+sudo apt-get -y install php >>log.txt 2>&1
+sudo apt-get -y install libapache2-mod-php >>log.txt 2>&1
+sudo apt-get -y install php-mcrypt >>log.txt 2>&1
+sudo apt-get -y install php-mysql >>log.txt 2>&1
+echo "GOOD: PHP Installed"
+
+#---------------------------------------------------------------------------------------
+# Loading Apache Configurations
+#---------------------------------------------------------------------------------------
+
+echo "INFO: Stopping Apache Service to load configurations"
+sudo service apache2 stop
 
 if [ $APRESTORE = 1 ]; then
-	echo "INFO: Stopping Apache Service to load configurations"
-	sudo service apache2 stop
+
 	echo "INFO: Removing configurations file--to prevent conflicts"
 	rm -r $APACHEDIR
 	tar -xvf $APACHECONFIG -C $APACHEDIR #untar to correct location
-
+	
 else
 	echo "INFO: Setting up Apache default values"
 	echo "### WARNING: Apache config files will not be secured ###"
@@ -336,24 +349,14 @@ else
 	
 	echo "INFO: Enabling $DOMAIN on Apache"
 	a2ensite $DOMAIN	
+	echo "GOOD: $DOMAIN enabled, restarting Apache2 service"
 fi
 
 rm $APACHECONFIG #remove downloaded Apache configurations
 sudo a2enmod rewrite #enable rewrite for permalinks to work
-sudo service apache2 reload
+sudo service apache2 start
 
-#---------------------------------------------------------------------------------------
-# Wordpress and PHP setup
-#---------------------------------------------------------------------------------------
-
-echo "INFO: Downloading dependant PHP and Apache components"
-sudo apt-get -y install php >>log.txt 2>&1
-sudo apt-get -y install libapache2-mod-php >>log.txt 2>&1
-sudo apt-get -y install php-mcrypt >>log.txt 2>&1
-sudo apt-get -y install php-mysql >>log.txt 2>&1
-
-echo "INFO: Restarting Apache service"
-sudo service apache2 restart
+echo "GOOD: LAMP Stack Installed!!"
 
 #---------------------------------------------------------------------------------------
 # Setup backup script & Cron jobs
