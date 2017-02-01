@@ -87,6 +87,8 @@ echo "DB Password not provided...creating one using pwgen"
 
 apt install pwgen
 DBPASS="$(pwgen -1 -s 64)"
+
+echo "Database parameteres : Good"
 else
 echo "Database parameteres : Good"
 fi
@@ -116,10 +118,11 @@ else
 	fi
 fi
 
-if [ -z "$APACHERESTORE" ]; #Check for Dropboxtoken
+if [ "$APACHERESTORE" = "YES" ]; #Check for Dropboxtoken
 then echo "Apache Settings will be set to default values"
 	if [ -z "$DOMAIN" ];
 	then echo "No Domain provided, unable to proceed. Either set --apacherestore or provide a --domain"
+	exit 0
 	else
 	echo "Apache Domain set to $DOMAIN"
 	fi
