@@ -84,7 +84,8 @@ done
 
 if [ -z "$DBPASS" ]; then #Check DB Parameters
 echo "DB Password not provided...creating one using pwgen"
-sudo apt install pwgen
+
+apt install pwgen
 DBPASS="$(pwgen -1 -s 64)"
 else
 echo "Database parameteres : Good"
@@ -310,7 +311,7 @@ else
 	echo "Apache Installed, loading Apache configuration"
 	tar -xvf $APACHECONFIG -C / #untar to correct location
 fi
-
+sudo a2enmod rewrite
 sudo service apache2 reload
 
 #---------------------------------------------------------------------------------------
