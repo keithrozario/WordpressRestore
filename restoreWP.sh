@@ -87,8 +87,8 @@ done
 if [ -z "$DBPASS" ]; then #Check DB Parameters
 	echo "INFO: DB Password not provided...creating one"
 
-	apt install pwgen >>log.txt 2>&1 #generate password using pwgen
-	DBPASS="$(pwgen -1 -s 64)" >>log.txt 2>&1
+	apt install pwgen >>log.txt  #generate password using pwgen
+	DBPASS="$(pwgen -1 -s 64)" >>log.txt
 
 	echo "GOOD: Database parameters generated"
 else
@@ -262,7 +262,7 @@ WPDBPASS=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_PASSWORD | cut -d \' -f 4`
 # Main-Initilization
 #---------------------------------------------------------------------------------------
 echo "INFO: Updating REPO"
-sudo apt-get update >>log.txt 2>&1
+sudo apt-get update >>log.txt
 export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 #---------------------------------------------------------------------------------------
@@ -270,7 +270,7 @@ export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 #---------------------------------------------------------------------------------------
 
 echo "INFO: Installing mysql-server"
-sudo -E apt-get -q -y install mysql-server >>log.txt 2>&1  #non-interactive mysql installation
+sudo -E apt-get -q -y install mysql-server >>log.txt  #non-interactive mysql installation
 
 #Some security cleaning up on mysql-----------------------------------------------------
 mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
@@ -413,4 +413,4 @@ fi
 #---------------------------------------------------------------------------------------
 # All Done
 #---------------------------------------------------------------------------------------
-echo "All Done"
+echo "GOOD: All Done"
