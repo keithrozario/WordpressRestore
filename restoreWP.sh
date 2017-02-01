@@ -282,8 +282,8 @@ sudo apt-get -y install apache2 #non-interactive apache2 install
 if [ -z "$APACHERESTORE" ]; then
 	
 	echo "Setting up Apache default values"
-	echo "### WARNING: Apache config files will not be secured ###
-	echo "### Consider modifying the config files post-install ###
+	echo "### WARNING: Apache config files will not be secured ###"
+	echo "### Consider modifying the config files post-install ###"
 	Echo "Copying 000-default config for $DOMAIN.conf"
 	cp $SITESAVAILABLEDIR/$DEFAULTAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
 	echo "Updating $DOMAIN.conf"
