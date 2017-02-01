@@ -321,7 +321,7 @@ if [ $APRESTORE = 1 ]; then
 
 	echo "INFO: Removing configurations file--to prevent conflicts"
 	rm -r $APACHEDIR
-	tar -xvf $APACHECONFIG -C $APACHEDIR #untar to correct location
+	tar -xvf $APACHECONFIG -C / ####WARNING: CHANGE THIS TO tar -xvf $APACHECONFIG -C $APACHEDIR 
 	
 else
 	echo "INFO: Setting up Apache default values"
