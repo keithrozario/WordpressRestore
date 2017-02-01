@@ -31,49 +31,51 @@ fi
 # Command line parameters
 #---------------------------------------------------------------------------------------
 
+echo -e "######### COMMAND LINE PARAMETERS BEGIN #########\\n"
+
 while [[ $# -gt 1 ]]
 do
 key="$1"
 
 case $key in
-    --dbrootpass)
+    --dbpass) #database password for root user (not wordpress user!)
     DBPASS="$2"
     shift # past argument
     ;;
     --dropboxtoken)
-    DROPBOXTOKEN="$2"
+    DROPBOXTOKEN="$2" #dropbox token for API connection
     shift # past argument
     ;;
     --enckey)
-    ENCKEY="$2"
+    ENCKEY="$2" #encryption/decryption key for sending/receiving files to/from dropbox
     shift # past argument
     ;;
     --cfemail)
-    CFEMAIL="$2"
+    CFEMAIL="$2" #email of Cloudflare account
     shift # past argument
     ;;
     --cfkey)
-    CFKEY="$2"
+    CFKEY="$2" #Cloudflare token for API connection
     shift # past argument
     ;;
     --cfzone)
-    CFZONE="$2"
+    CFZONE="$2" #ZONE for the domain updated e.g. example.com
     shift # past argument
     ;;
     --cfrecord)
-    CFRECORD="$2"
+    CFRECORD="$2" #Actual record for domain updated e.g. www.example.com
     shift # past argument
     ;;
     --prodcert)
-    PRODCERT="$2"
+    PRODCERT="$2" #set to 1 to call production cert, any other value to call test
     shift # past argument
     ;;
     --domain)
-    DOMAIN="$2"
+    DOMAIN="$2" #Domain of site, used for Apache configurations 
     shift # past argument
     ;;
-    --apacherestore)
-    APACHERESTORE=YES
+    --aprestore)
+    APRESTORE="$2" #apache restore, set to 1 to restore apache
     ;;
     *)
             # unknown option
@@ -83,52 +85,59 @@ shift # past argument or value
 done
 
 if [ -z "$DBPASS" ]; then #Check DB Parameters
-echo "DB Password not provided...creating one using pwgen"
+	echo "INFO: DB Password not provided...creating one"
 
-apt install pwgen
-DBPASS="$(pwgen -1 -s 64)"
+	apt install pwgen >>log.txt 2>&1 #generate password using pwgen
+	DBPASS="$(pwgen -1 -s 64)" >>log.txt 2>&1
 
-echo "Database parameteres : Good"
+	echo "GOOD: Database parameters generated"
 else
-echo "Database parameteres : Good"
+	echo "GOOD: Database parameters received"
 fi
 
-if [ -z "$DROPBOXTOKEN" ]; #Check for Dropboxtoken
-then echo "Please provide the Dropbox Token, refer to http://bit.ly/2it95it to get one"
-exit 0
+if [ -z "$DROPBOXTOKEN" ]; then #Check for Dropboxtoken
+	echo "ERROR: Please provide the Dropbox Token, refer to http://bit.ly/2it95it to get one"
+	exit 0
 else
-echo "Dropbox parameteres : Good"
+	echo "GOOD: Dropbox Parameters found"
 fi
 
-if [ -z "$CFEMAIL" ] || [ -z "$CFKEY" ] || [ -z "$CFZONE" ] || [ -z "$CFRECORD" ]; #Check for Dropboxtoken
-then echo "Insufficient Cloudflare parameters, DNS record will not be updated"
-DNSUPDATE=false
+if [ -z "$CFEMAIL" ] || [ -z "$CFKEY" ] || [ -z "$CFZONE" ] || [ -z "$CFRECORD" ]; then #Check for Dropboxtoken
+	echo "WARNING: Insufficient Cloudflare parameters, DNS record will not be updated"
+	DNSUPDATE=false
 else
-echo "Cloudflare Parameters : Good"
-DNSUPDATE=true
+	echo "GOOD: Cloudflare parameters received"
+	DNSUPDATE=true
 fi
 
-if [ -z "$PRODCERT" ]; #Check for Dropboxtoken
-then echo "--prodcert not set, let's encrypt certificate calling switched off"
+if [ -z "$PRODCERT" ]; then #Check for Dropboxtoken
+	echo "WARNING: --prodcert not set, let's encrypt certificate calling switched off"
 else
 	if [ $PRODCERT = 1 ]; then
-	echo "--prodcert set to 1, calling Let's Encrypt in Production mode"
+		echo "GOOD: --prodcert set to 1, calling Let's Encrypt in Production mode"
 	else
-	echo "--prodcert not set to 1, calling Let's Encrypt in test mode"
+		echo "WARNING: --prodcert not set to 1, calling Let's Encrypt in test mode"
 	fi
 fi
 
-if [ "$APACHERESTORE" = "YES" ]; #Check for Dropboxtoken
-then echo "Apache Settings will be set to default values"
-	if [ -z "$DOMAIN" ];
-	then echo "No Domain provided, unable to proceed. Either set --apacherestore or provide a --domain"
-	exit 0
+if [ -z "$APRESTORE" ]; then #Restore Apache or build from scratch
+	echo "INFO: Apache Settings will be built from scratch"
+	if [ -z "$DOMAIN" ]; then
+		echo "ERROR: No Domain provided, unable to proceed. Either set --apacherestore or provide a --domain"
+		exit 0
 	else
-	echo "Apache Domain set to $DOMAIN"
+		echo "GOOD: Apache Domain set to $DOMAIN"
 	fi
 else
-echo "Apache Settings will restored from backup"
+	if [ $APRESTORE = 1 ]; then
+		echo "GOOD: --aprestore set to 1, restoring apache from backup files "
+	else
+		echo "ERROR: --aprestore set to value other than 1. Unknown setting, exiting..."
+		exit 0
+	fi
 fi
+
+echo -e "######### COMMAND LINE PARAMETERS END #########\\n\\n"
 
 #---------------------------------------------------------------------------------------
 # Global Constants
@@ -153,10 +162,12 @@ EIGHTSPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spac
 #---------------------------------------------------------------------------------------
 
 if [ "$DNSUPDATE" = true ]; then
-	echo "Updating cloudflare record $CFRECORD in zone $CFZONE using credentials $CFEMAIL , $CFKEY "
+	echo -e "\\n\\n######### CLOUDFLARE UPDATE #########\\n\\n"
+	echo "INFO: Updating cloudflare record $CFRECORD in zone $CFZONE using credentials $CFEMAIL , $CFKEY "
 	./cloudflare.sh --email $CFEMAIL --key $CFKEY --zone $CFZONE --record $CFRECORD
-	echo "Removing Cloudflare script"
+	echo "INFO: Removing Cloudflare script"
 	rm cloudflare.sh #you only need it once
+	echo "GOOD: Cloudflare update complete"
 else
 	echo "WARNING: DNS wasn't updated"
 fi
@@ -187,20 +198,25 @@ fi
 #Download files from dropbox
 #---------------------------------------------------------------------------------------
 
+echo -e "\\n\\n######### Downloading from Dropbox #########\\n\\n"
+
+echo "INFO: Downloading and decrypting SQL backup file"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
 openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY 
 
+echo "INFO: Downloading and decrypting Wordpress zip file"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
 openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
+echo "INFO: Downloading and decrypting Apache configuration"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
 openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
 
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
-	echo "wp-config is in $WPZIPFILE, no further downloads required"
+	echo "INFO: wp-config is in $WPZIPFILE, no further downloads required"
 else
-	echo "wp-config is a separate file, downloading $WPCONFIGFILE from Dropbox"
+	echo "INFO: wp-config is a separate file, downloading $WPCONFIGFILE from Dropbox"
 	/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILE.enc #encrypted Wp-config.php file
 	openssl enc -aes-256-cbc -d -in $WPCONFIGFILE.enc -out $WPCONFIGFILE -k $ENCKEY
 fi
@@ -212,30 +228,30 @@ rm *.enc #remove encrypted files after decryption
 #---------------------------------------------------------------------------------------
 
 if [ -d $WPDIR ]; then
-echo "Removing older version of $WPDIR"
+echo "WARNING: Removing older version of $WPDIR"
 rm -r $WPDIR #remove current directory (to avoid conflicts)
 else 
-echo "Good: $WPDIR not found, proceeding to extraction"
+echo "GOOD: $WPDIR not found, proceeding to extraction"
 fi
 
 mkdir -p $WPDIR
 tar -xzf $WPZIPFILE -C $WPDIR .
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
-	echo "wp-config file is part of $WPDIR, no further action required"
+	echo "INFO: wp-config file is part of $WPDIR, no further action required"
 else
-	echo "wp-config is a separate file, moving it to $WPCONFDIR"
+	echo "INFO: wp-config is a separate file, moving it to $WPCONFDIR"
 	mv $WPCONFIGFILE $WPCONFDIR
-	echo "wp-config file moved to $WPCONFDIR"
+	echo "INFO: wp-config file moved to $WPCONFDIR"
 fi
 
-echo "Wordpress Files extracted"
+echo "GOOD: Wordpress Files extracted"
 
 #---------------------------------------------------------------------------------------
 # Get DB Parameters from wp-config.php
 #---------------------------------------------------------------------------------------
 
-echo "Obtaining configuration parameters from wp-config.php"
+echo "INFO: Obtaining configuration parameters from wp-config.php"
 
 WPDBNAME=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_NAME | cut -d \' -f 4`
 WPDBUSER=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_USER | cut -d \' -f 4`
@@ -244,15 +260,16 @@ WPDBPASS=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_PASSWORD | cut -d \' -f 4`
 #---------------------------------------------------------------------------------------
 # Main-Initilization
 #---------------------------------------------------------------------------------------
-
-sudo apt-get update 
+echo "INFO: Updating REPO"
+sudo apt-get update >>log.txt 2>&1
 export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 #---------------------------------------------------------------------------------------
 # Install MySQL and Dependencies
 #---------------------------------------------------------------------------------------
 
-sudo -E apt-get -q -y install mysql-server #non-interactive mysql installation
+echo "INFO: Installing mysql-server"
+sudo -E apt-get -q -y install mysql-server >>log.txt 2>&1  #non-interactive mysql installation
 
 #Some security cleaning up on mysql-----------------------------------------------------
 mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
@@ -274,16 +291,17 @@ mysql -u root -e "FLUSH PRIVILEGES;"
 chmod 644 /etc/mysql/my.cnf
 
 #Extract mysqlfiles---------------------------------------------------------------------
-echo "Loading $WPSQLFILE into database $WPDBNAME"
+echo "INFO: Loading $WPSQLFILE into database $WPDBNAME"
 mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
 
 #---------------------------------------------------------------------------------------
 # Apache Setup and Dependencies
 #---------------------------------------------------------------------------------------
 
-sudo apt-get -y install apache2 #non-interactive apache2 install
+echo "INFO: Installing Apache2"
+sudo apt-get -y install apache2 >>log.txt 2>&1 #non-interactive apache2 install
 
-if [ -z "$APACHERESTORE" ]; then
+if [ $APRESTORE = 1 ]; then
 	
 	echo "Setting up Apache default values"
 	echo "### WARNING: Apache config files will not be secured ###"
@@ -323,11 +341,13 @@ sudo service apache2 reload
 # Wordpress and PHP setup
 #---------------------------------------------------------------------------------------
 
-sudo apt-get -y install php 
-sudo apt-get -y install libapache2-mod-php
-sudo apt-get -y install php-mcrypt
-sudo apt-get -y install php-mysql
+echo "INFO: Downloading dependant PHP and Apache components"
+sudo apt-get -y install php >>log.txt 2>&1
+sudo apt-get -y install libapache2-mod-php >>log.txt 2>&1
+sudo apt-get -y install php-mcrypt >>log.txt 2>&1
+sudo apt-get -y install php-mysql >>log.txt 2>&1
 
+echo "INFO: Restarting Apache service"
 sudo service apache2 restart
 
 #---------------------------------------------------------------------------------------
