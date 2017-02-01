@@ -86,7 +86,7 @@ echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE"
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
 #-------------------------------------------------------------------------
-tar czf $BACKUPPATH/$APACHECONFIG -C $APACHEDIR
+tar -czf $BACKUPPATH/$APACHECONFIG -C $APACHEDIR
 
 #-------------------------------------------------------------------------
 # Encrypting files before uploading
