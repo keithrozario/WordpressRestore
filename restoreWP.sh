@@ -321,6 +321,7 @@ if [ $APRESTORE = 1 ]; then
 
 	echo "INFO: Removing configurations file--to prevent conflicts"
 	rm -r $APACHEDIR
+	mkdir $APACHEDIR
 	tar -xvf $APACHECONFIG -C $APACHEDIR
 	
 else
