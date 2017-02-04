@@ -219,6 +219,7 @@ GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 #Download .wpsettings file
 #---------------------------------------------------------------------------------------
 rm *.enc #remove any old encrypted files
+rm $WPSETTINGSFILEDIR/$WPSETTINGSFILE #remove old wpsettings file
 
 echo "INFO: Checking if $WPSETTINGSFILE exist on Dropbox"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
@@ -237,6 +238,10 @@ fi
 #---------------------------------------------------------------------------------------
 #Download files from dropbox
 #---------------------------------------------------------------------------------------
+rm $WPSQLFILE #remove old files if they exist
+rm $APACHECONFIG
+rm $WPZIPFILE
+rm $WPCONFIGFILE
 
 echo "INFO: Downloading and decrypting SQL backup file"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
