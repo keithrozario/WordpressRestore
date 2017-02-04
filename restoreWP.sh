@@ -31,7 +31,7 @@ fi
 # Command line parameters
 #---------------------------------------------------------------------------------------
 
-echo -e "\\n\\n######### COMMAND LINE PARAMETERS BEGIN #########"
+echo -e "\\n\\n######### COMMAND LINE PARAMETERS BEGIN #########\\n\\n"
 
 while [[ $# -gt 1 ]]
 do
@@ -137,7 +137,7 @@ else
 	fi
 fi
 
-echo -e "######### COMMAND LINE PARAMETERS END #########"
+echo -e "######### COMMAND LINE PARAMETERS END #########\\n\\n"
 
 #---------------------------------------------------------------------------------------
 # Global Constants
@@ -162,7 +162,7 @@ EIGHTSPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spac
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### CLOUDFLARE UPDATE #########"
+echo -e "\\n\\n######### CLOUDFLARE UPDATE #########\\n\\n"
 
 if [ "$DNSUPDATE" = true ]; then
 	
@@ -176,12 +176,12 @@ else
 	echo "WARNING: DNS wasn't updated"
 fi
 
-echo -e "######### CLOUDFLARE UPDATE COMPLETE#########"
+echo -e "\\n\\n######### CLOUDFLARE UPDATE END#########"
 
 #---------------------------------------------------------------------------------------
 # Main-Initilization
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### REPO UPDATE #########"
+echo -e "\\n\\n######### REPO UPDATE #########\\n\\n"
 
 echo "INFO: Updating REPO"
 sudo apt-get update >>$LOGFILE
@@ -206,12 +206,12 @@ sudo apt-get -y autoclean >>$LOGFILE
 echo "INFO: Upgrading installed packages" #do this after deletion to avoid upgrading packages set for deletion
 sudo apt-get upgrade >>$LOGFILE
 
-echo -e "######### REPO UPDATE COMPLETE #########"
+echo -e "\\n\\n######### REPO UPDATE COMPLETE #########\\n\\n"
 
 #---------------------------------------------------------------------------------------
 #Setup DropboxUploader
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### Downloading from Dropbox #########"
+echo -e "\\n\\n######### Downloading from Dropbox #########\\n\\n"
 
 GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 
@@ -260,12 +260,12 @@ else
 fi
 
 rm *.enc #remove encrypted files after decryption
-echo -e "######### Downloaded backup files from Dropbox #########"
+echo -e "\\n\\n######### Downloaded backup files from Dropbox #########\\n\\n"
 
 #---------------------------------------------------------------------------------------
 # Extracting Wordpress Files
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### Extracting Wordpress Files #########"
+echo -e "\\n\\n######### Extracting Wordpress Files #########\\n\\n"
 
 if [ -d $WPDIR ]; then
 echo "WARNING: Removing older version of $WPDIR"
@@ -286,7 +286,7 @@ else
 fi
 
 echo "GOOD: Wordpress Files extracted"
-echo -e "######### Wordpress Extractiong Complete #########"
+
 
 #---------------------------------------------------------------------------------------
 # Get DB Parameters from wp-config.php
@@ -298,10 +298,11 @@ WPDBNAME=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_NAME | cut -d \' -f 4`
 WPDBUSER=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_USER | cut -d \' -f 4`
 WPDBPASS=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_PASSWORD | cut -d \' -f 4`
 
+echo -e "\\n\\n######### Wordpress Extractiong Complete #########\\n\\n"
 #---------------------------------------------------------------------------------------
 # Install MySQL and Dependencies
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### Installing mysql Server #########"
+echo -e "\\n\\n######### Installing mysql Server #########\\n\\n"
 echo "INFO: Installing mysql-server"
 sudo -E apt-get -q -y install mysql-server >>$LOGFILE  #non-interactive mysql installation
 
@@ -328,11 +329,11 @@ chmod 644 /etc/mysql/my.cnf
 echo "INFO: Loading $WPSQLFILE into database $WPDBNAME"
 mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
 
-echo -e "######### MYSQL Server Installed #########"
+echo -e "\\n\\n######### MYSQL Server Installed #########\\n\\n"
 #---------------------------------------------------------------------------------------
 # Basic Apache and PHP Installations
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### Installing APACHE & PHP #########"
+echo -e "\\n\\n######### Installing APACHE & PHP #########\\n\\n"
 echo "INFO: Installing Apache2"
 sudo apt-get -y install apache2 >>$LOGFILE #non-interactive apache2 install
 echo "GOOD: Apache Installed"
@@ -392,11 +393,11 @@ sudo a2enmod rewrite >>$LOGFILE #enable rewrite for permalinks to work
 sudo service apache2 start
 
 echo "GOOD: LAMP Stack Installed!!"
-echo -e "######### APACHE & PHP INSTALLED #########"
+echo -e "\\n\\n######### APACHE & PHP INSTALLED #########\\n\\n"
 #---------------------------------------------------------------------------------------
 # Setup backup script & Cron jobs
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### Setting CRON Job, Swap File and Firewall #########"
+echo -e "\\n\\n######### Setting CRON Job, Swap File and Firewall #########\\n\\n"
 
 SetCronJob #from functions.sh
 SetEncKey $ENCKEY
@@ -420,11 +421,11 @@ sudo ufw allow ssh
 sudo ufw allow http
 sudo ufw allow https
 echo y | sudo ufw enable
-echo -e "######### CRON jobs, firewall and swap file COMPLETE #########"
+echo -e "\\n\\n######### CRON jobs, firewall and swap file COMPLETE #########\\n\\n"
 #---------------------------------------------------------------------------------------
 # Lets encrypt
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### Let's encrypt #########"
+echo -e "\\n\\n######### Let's encrypt #########\\n\\n"
 #Future Feature to ping $Domain and check if IP=this machine, only then proceed
 #While possible to do this automatically, I prefer to use letsencrypt supported script
 sudo apt-get -y install python-letsencrypt-apache >>$LOGFILE
@@ -445,7 +446,7 @@ else
 		letsencrypt --apache --staging
 	fi
 fi
-echo -e "######### Let's encrypt COMPLETE #########"
+echo -e "\\n\\n######### Let's encrypt COMPLETE #########\\n\\n"
 #---------------------------------------------------------------------------------------
 # All Done
 #---------------------------------------------------------------------------------------
