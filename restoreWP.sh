@@ -194,8 +194,8 @@ sudo apt-get --purge -y remove php-mcrypt >>$LOGFILE
 sudo apt-get --purge -y remove php-mysql >>$LOGFILE
 audo apt-get --purge -y python-letsencrypt-apache >>$LOGFILE
 
-sudo apt-get -y autoremove
-sudo apt-get -y autoclean
+sudo apt-get -y autoremove >>$LOGFILE
+sudo apt-get -y autoclean >>$LOGFILE
 
 echo "INFO: Upgrading installed packages" #do this after deletion to avoid upgrading packages set for deletion
 sudo apt-get upgrade >>$LOGFILE
