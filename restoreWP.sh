@@ -137,7 +137,7 @@ else
 	fi
 fi
 
-echo -e "######### COMMAND LINE PARAMETERS END #########\\n\\n"
+echo -e "\\n\\n######### COMMAND LINE PARAMETERS END #########\\n\\n"
 
 #---------------------------------------------------------------------------------------
 # Global Constants
