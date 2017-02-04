@@ -161,7 +161,7 @@ echo "\\n\\n######### Upload to Dropbox END #########\\n\\n"
 # Lets Encrypt
 #-------------------------------------------------------------------------
 echo "\\n\\n######### LetsEncrypt BEGIN #########\\n\\n"
-If [ -d $LETSENCRYPTDIR ]; then
+if [ -d $LETSENCRYPTDIR ]; then
     echo "INFO: LetsEncrypt detected, backing up files"
     tar -czf $BACKUPPATH/$LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
     echo "INFO: Encrypting Letsencrypt Configuration"
