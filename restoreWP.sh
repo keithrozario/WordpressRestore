@@ -198,7 +198,7 @@ sudo apt-get --purge -y remove php >>$LOGFILE
 sudo apt-get --purge -y remove libapache2-mod-php >>$LOGFILE
 sudo apt-get --purge -y remove php-mcrypt >>$LOGFILE
 sudo apt-get --purge -y remove php-mysql >>$LOGFILE
-audo apt-get --purge -y python-letsencrypt-apache >>$LOGFILE
+sudo apt-get --purge -y python-letsencrypt-apache >>$LOGFILE
 
 sudo apt-get -y autoremove >>$LOGFILE
 sudo apt-get -y autoclean >>$LOGFILE
