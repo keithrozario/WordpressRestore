@@ -172,7 +172,7 @@ if [ -d $LETSENCRYPTDIR ]; then
     openssl enc -aes-256-cbc -in $BACKUPPATH/$LETSENCRYPTCONFIG -out $BACKUPPATH/$LETSENCRYPTCONFIG.enc -k $ENCKEY
     rm $BACKUPPATH/$LETSENCRYPTCONFIG #remove unencrypted file
     echo -e "INFO: Uploading Letsencrypt to Dropbox"
-    $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$LETSENCRYPTCONFIG.enc
+    $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$LETSENCRYPTCONFIG.enc /
 else
     echo -e "LetsEncrypt not found"
 fi
