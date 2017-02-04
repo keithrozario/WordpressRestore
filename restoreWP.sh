@@ -158,6 +158,7 @@ SITESAVAILABLEDIR=/etc/apache2/sites-available
 DEFAULTAPACHECONF=000-default.conf
 EIGHTSPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spaces
 
+SWAPFILE=/swap #swapfile
 
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
@@ -411,11 +412,12 @@ ENCKEY=0 #for security reasons set back to 0
 #---------------------------------------------------------------------------------------
 # Swap File creation (1GB) thanks to peteris.rocks for this code: http://bit.ly/2kf7KQm
 #---------------------------------------------------------------------------------------
-
-sudo fallocate -l 1G /swapfile 
-sudo chmod 0600 /swapfile 
-sudo mkswap /swapfile 
-sudo swapon /swapfile 
+swapoff -a #switch of swap -- idempotency
+rm $SWAPFILE
+sudo fallocate -l 1G $SWAPFILE
+sudo chmod 0600 $SWAPFILE
+sudo mkswap $SWAPFILE
+sudo swapon $SWAPFILE
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 #---------------------------------------------------------------------------------------
