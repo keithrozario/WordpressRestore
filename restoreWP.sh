@@ -186,7 +186,7 @@ export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 # Remove previous installations if necessary
 #---------------------------------------------------------------------------------------
 echo "INFO: Attempting to delete older packages if they exist -- idempotency"
-sudo apt-get --purge -y remove mysql-server >>$LOGFILE 
+sudo apt-get --purge -y remove mysql* >>$LOGFILE #remove all mysql packages
 sudo apt-get --purge -y remove apache2 >>$LOGFILE 
 sudo apt-get --purge -y remove php >>$LOGFILE
 sudo apt-get --purge -y remove libapache2-mod-php >>$LOGFILE
@@ -194,8 +194,8 @@ sudo apt-get --purge -y remove php-mcrypt >>$LOGFILE
 sudo apt-get --purge -y remove php-mysql >>$LOGFILE
 audo apt-get --purge -y python-letsencrypt-apache >>$LOGFILE
 
-sudo apt-get autoremove
-sudo apt-get autoclean
+sudo apt-get -y autoremove
+sudo apt-get -y autoclean
 
 echo "INFO: Upgrading installed packages" #do this after deletion to avoid upgrading packages set for deletion
 sudo apt-get upgrade >>$LOGFILE
@@ -289,7 +289,7 @@ WPDBPASS=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_PASSWORD | cut -d \' -f 4`
 #---------------------------------------------------------------------------------------
 
 echo "INFO: Installing mysql-server"
-sudo -E apt-get -q -y install $MYSQL >>log.txt  #non-interactive mysql installation
+sudo -E apt-get -q -y install mysql-server >>$LOGFILE  #non-interactive mysql installation
 
 #Some security cleaning up on mysql-----------------------------------------------------
 mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
