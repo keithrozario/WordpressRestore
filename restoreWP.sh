@@ -164,12 +164,13 @@ EIGHTSPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spac
 #---------------------------------------------------------------------------------------
 
 if [ "$DNSUPDATE" = true ]; then
-	echo -e "\\n\\n######### CLOUDFLARE UPDATE #########\\n\\n"
+	echo -e "\\n\\n######### CLOUDFLARE UPDATE #########"
 	echo "INFO: Updating cloudflare record $CFRECORD in zone $CFZONE using credentials $CFEMAIL , $CFKEY "
 	./cloudflare.sh --email $CFEMAIL --key $CFKEY --zone $CFZONE --record $CFRECORD
 	echo "INFO: Removing Cloudflare script"
 	rm cloudflare.sh #you only need it once
 	echo "GOOD: Cloudflare update complete"
+	echo -e "######### CLOUDFLARE UPDATE COMPLETE#########"
 else
 	echo "WARNING: DNS wasn't updated"
 fi
@@ -177,6 +178,8 @@ fi
 #---------------------------------------------------------------------------------------
 # Main-Initilization
 #---------------------------------------------------------------------------------------
+echo -e "\\n\\n######### REPO UPDATE #########"
+
 echo "INFO: Updating REPO"
 sudo apt-get update >>$LOGFILE
 #we will upgrade after deletion of unwanted packages
@@ -200,23 +203,30 @@ sudo apt-get -y autoclean >>$LOGFILE
 echo "INFO: Upgrading installed packages" #do this after deletion to avoid upgrading packages set for deletion
 sudo apt-get upgrade >>$LOGFILE
 
+echo -e "######### REPO UPDATE COMPLETE #########"
+
 #---------------------------------------------------------------------------------------
 #Setup DropboxUploader
 #---------------------------------------------------------------------------------------
+echo -e "\\n\\n######### Downloading from Dropbox #########"
 
 GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 
 #---------------------------------------------------------------------------------------
 #Download .wpsettings file
 #---------------------------------------------------------------------------------------
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
-openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
+rm *.enc #remove any old encrypted files
 
-if [ -f $WPSETTINGSFILEDIR/$WPSETTINGSFILE ]; then
-	echo "Loading $WPSETTINGSFILE"
+echo "INFO: Checking if $WPSETTINGSFILE exist on Dropbox"
+/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
+
+if [ -f $WPSETTINGSFILE.enc ]; then
+	echo "GOOD: $WPSETTINGSFILE exist, decrypting and loading"
+	openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
+	echo "INFO: Loading $WPSETTINGSFILE"
 	source "$WPSETTINGSFILEDIR/$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
 else 
-	echo "Unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
+	echo "ERROR: unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
 	exit 0
 fi
 
@@ -224,8 +234,6 @@ fi
 #---------------------------------------------------------------------------------------
 #Download files from dropbox
 #---------------------------------------------------------------------------------------
-
-echo -e "\\n\\n######### Downloading from Dropbox #########\\n\\n"
 
 echo "INFO: Downloading and decrypting SQL backup file"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
@@ -249,10 +257,12 @@ else
 fi
 
 rm *.enc #remove encrypted files after decryption
+echo -e "######### Downloaded backup files from Dropbox #########"
 
 #---------------------------------------------------------------------------------------
 # Extracting Wordpress Files
 #---------------------------------------------------------------------------------------
+echo -e "\\n\\n######### Extracting Wordpress Files #########"
 
 if [ -d $WPDIR ]; then
 echo "WARNING: Removing older version of $WPDIR"
@@ -273,6 +283,7 @@ else
 fi
 
 echo "GOOD: Wordpress Files extracted"
+echo -e "######### Wordpress Extractiong Complete #########"
 
 #---------------------------------------------------------------------------------------
 # Get DB Parameters from wp-config.php
@@ -287,13 +298,13 @@ WPDBPASS=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_PASSWORD | cut -d \' -f 4`
 #---------------------------------------------------------------------------------------
 # Install MySQL and Dependencies
 #---------------------------------------------------------------------------------------
-
+echo -e "\\n\\n######### Installing mysql Server #########"
 echo "INFO: Installing mysql-server"
 sudo -E apt-get -q -y install mysql-server >>$LOGFILE  #non-interactive mysql installation
 
 #Some security cleaning up on mysql-----------------------------------------------------
 mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
-echo "Setting password for root user to $DBPASS"
+echo "INFO: Setting password for root user to $DBPASS"
 mysql -u root -e "UPDATE mysql.user SET authentication_string=PASSWORD('$DBPASS') WHERE User='root';"
 mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
 mysql -u root -e "DROP DATABASE IF EXISTS test;"
@@ -301,9 +312,9 @@ mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
 mysql -u root -e "FLUSH PRIVILEGES;"
 
 #Create DB for Wordpress with user------------------------------------------------------
-echo "Creating Database with name $WPDBNAME"
+echo "INFO: Creating Database with name $WPDBNAME"
 mysql -u root -e "CREATE DATABASE IF NOT EXISTS $WPDBNAME;"
-echo "Granting Permission to $WPDBUSER with password: $WPDBPASS"
+echo "INFO: Granting Permission to $WPDBUSER with password: $WPDBPASS"
 mysql -u root -e "GRANT ALL ON *.* TO '$WPDBUSER'@'localhost' IDENTIFIED BY '$WPDBPASS';"
 mysql -u root -e "FLUSH PRIVILEGES;"
 
@@ -314,10 +325,11 @@ chmod 644 /etc/mysql/my.cnf
 echo "INFO: Loading $WPSQLFILE into database $WPDBNAME"
 mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
 
+echo -e "######### MYSQL Server Installed #########"
 #---------------------------------------------------------------------------------------
 # Basic Apache and PHP Installations
 #---------------------------------------------------------------------------------------
-
+echo -e "\\n\\n######### Installing APACHE & PHP #########"
 echo "INFO: Installing Apache2"
 sudo apt-get -y install apache2 >>$LOGFILE #non-interactive apache2 install
 echo "GOOD: Apache Installed"
@@ -377,11 +389,11 @@ sudo a2enmod rewrite >>$LOGFILE #enable rewrite for permalinks to work
 sudo service apache2 start
 
 echo "GOOD: LAMP Stack Installed!!"
-
+echo -e "######### APACHE & PHP INSTALLED #########"
 #---------------------------------------------------------------------------------------
 # Setup backup script & Cron jobs
 #---------------------------------------------------------------------------------------
-echo -e "\\n\\n######### Setting CRON Job, Swap File and Firewall #########\\n\\n"
+echo -e "\\n\\n######### Setting CRON Job, Swap File and Firewall #########"
 
 SetCronJob #from functions.sh
 SetEncKey $ENCKEY
@@ -405,11 +417,11 @@ sudo ufw allow ssh
 sudo ufw allow http
 sudo ufw allow https
 echo y | sudo ufw enable
-
+echo -e "######### CRON jobs, firewall and swap file COMPLETE #########"
 #---------------------------------------------------------------------------------------
 # Lets encrypt
 #---------------------------------------------------------------------------------------
-
+echo -e "\\n\\n######### Let's encrypt #########"
 #Future Feature to ping $Domain and check if IP=this machine, only then proceed
 #While possible to do this automatically, I prefer to use letsencrypt supported script
 sudo apt-get -y install python-letsencrypt-apache >>$LOGFILE
@@ -417,7 +429,7 @@ sudo apt-get -y install python-letsencrypt-apache >>$LOGFILE
 if [ -z "$PRODCERT" ]; then #Check for prodcert
 	echo "Let's encrypt not called, no certificate will be set"
 else
-	echo -e "\\n\\n######### Getting Certs #########\\n\\n"
+	echo -e "\\n\\n######### Getting Certs #########"
 	
 	( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
 	( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
@@ -430,7 +442,7 @@ else
 		letsencrypt --apache --staging
 	fi
 fi
-
+echo -e "######### Let's encrypt COMPLETE #########"
 #---------------------------------------------------------------------------------------
 # All Done
 #---------------------------------------------------------------------------------------
