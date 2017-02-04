@@ -144,10 +144,6 @@ echo -e "######### COMMAND LINE PARAMETERS END #########\\n\\n"
 #---------------------------------------------------------------------------------------
 LOGFILE=log.txt
 
-#Installed package names
-MYSQL=mysql-server
-
-
 WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
 WPCONFIGFILE=wp-config.php
@@ -179,9 +175,22 @@ else
 fi
 
 #---------------------------------------------------------------------------------------
+# Main-Initilization
+#---------------------------------------------------------------------------------------
+echo "INFO: Updating REPO"
+sudo apt-get update >>$LOGFILE
+export DEBIAN_FRONTEND=noninteractive #Silence all interactions
+
+#---------------------------------------------------------------------------------------
 # Remove previous installations if necessary
 #---------------------------------------------------------------------------------------
-sudo apt-get --purge remove -y $MYSQL >>log.txt
+echo "INFO: Attempting to delete older packages if they exist -- idempotency"
+sudo apt-get --purge -y remove mysql-server >>$LOGFILE 
+sudo apt-get --purge -y remove apache2 >>$LOGFILE 
+sudo apt-get --purge -y remove php >>$LOGFILE
+sudo apt-get --purge -y remove libapache2-mod-php >>$LOGFILE
+sudo apt-get --purge -y remove php-mcrypt >>$LOGFILE
+sudo apt-get --purge -y remove php-mysql >>$LOGFILE
 
 
 #---------------------------------------------------------------------------------------
@@ -267,13 +276,6 @@ echo "INFO: Obtaining configuration parameters from wp-config.php"
 WPDBNAME=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_NAME | cut -d \' -f 4`
 WPDBUSER=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_USER | cut -d \' -f 4`
 WPDBPASS=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_PASSWORD | cut -d \' -f 4`
-
-#---------------------------------------------------------------------------------------
-# Main-Initilization
-#---------------------------------------------------------------------------------------
-echo "INFO: Updating REPO"
-sudo apt-get update >>$LOGFILE
-export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 #---------------------------------------------------------------------------------------
 # Install MySQL and Dependencies
