@@ -19,22 +19,25 @@ WPSETTINGSFILE=/var/.wpsettings
 ENCKEYFILE=/var/.enckey
 
 #-------------------------------------------------------------------------
-# Check if WPCONFPASSFILE or WPCONFPASSARG--or both!
+# Check if WPSETTINGSFILE and ENCKEY are present
 #-------------------------------------------------------------------------
+"\\n\\n######### Checking for .wpsettings and enckey #########\\n\\n"
 if [ -f $WPSETTINGSFILE ]; then
     source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
+    echo "GOOD: .wpsettings file found"
 else 
-    echo "Unable to find $WPSETTINGSFILE, please run setup.sh for first time"
+    echo "ERROR: Unable to find $WPSETTINGSFILE, please run setup.sh for first time"
     exit 0
 fi
 
 if [ -f $ENCKEYFILE ]; then
     source "$ENCKEYFILE" 2>/dev/null #file exist, load variables
+    cho "GOOD: .enckey found"
 else 
-    echo "Unable to find $ENCKEYFILE, please run setup.sh for first time"
+    echo "ERROR: Unable to find $ENCKEYFILE, please run setup.sh for first time"
     exit 0
 fi
-
+"\\n\\n######### Check end #########\\n\\n"
 #-------------------------------------------------------------------------
 # Global Constants
 #-------------------------------------------------------------------------
@@ -42,9 +45,12 @@ WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
 WPCONFIGFILE=wp-config.php
 APACHECONFIG=apachecfg.tar
+LETSENCRYPTCONFIG=letsencrypt.tar
 WPSETTINGSFILENAME=.wpsettings
+
 APACHEDIR=/etc/apache2
 BACKUPPATH=/var/backupWP
+LETSENCRYPTDIR=/etc/letsencrypt
 
 # WPDIR=/var/www/html #taken from .wpsettings file
 # WPCONFDIR=/var/www/html #taken from .wpsettings file
@@ -54,68 +60,91 @@ BACKUPPATH=/var/backupWP
 #-------------------------------------------------------------------------
 # Delete Previous files if they exist (ensure idempotency)
 #-------------------------------------------------------------------------
+"\\n\\n######### Creating Backup Path #########\\n\\n"
 if [ -d $BACKUPPATH ]; then
-echo "Removing older version of $BACKUPPAT"
-rm -r $BACKUPPATH #remove current directory (to avoid conflicts)
-mkdir $BACKUPPATH
+    echo "WARNING: Removing older version of $BACKUPPATH"
+    rm -r $BACKUPPATH #remove current directory (to avoid conflicts)
+    mkdir $BACKUPPATH
 else 
-echo "$BACKUPPATH not found, creating path"
-mkdir $BACKUPPATH
+    echo "$BACKUPPATH not found, creating path"
+    mkdir $BACKUPPATH
 fi
-
+"\\n\\n######### Backup Path created #########\\n\\n"
 #-------------------------------------------------------------------------
 # mysqldump the MYSQL Database
 #-------------------------------------------------------------------------
+"\\n\\n######### Backing Up Mysql Database #########\\n\\n"
 WPDBNAME=`cat $WPCONFDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
 WPDBUSER=`cat $WPCONFDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
 WPDBPASS=`cat $WPCONFDIR/wp-config.php | grep DB_PASSWORD | cut -d \' -f 4`
 
-echo "Dumping MYSQL Files"
-mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE
-
-echo "MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
+if [ -z $WPDBNAME ]; then
+    echo "ERROR: unable to extract DB NAME from $WPCONFDIR/wp-config.php"
+    exit 0
+else
+    echo "INFO: Dumping MYSQL Files"
+    mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE
+    echo "GOOD: MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
+fi
+"\\n\\n######### Database Backup Complete #########\\n\\n"
 
 #-------------------------------------------------------------------------
 # Zip $WPDIR folder
 #-------------------------------------------------------------------------
-echo "Zipping the Wordpress Directory in : $WPDIR"
+"\\n\\n######### Zipping Wordpress #########\\n\\n"
+
+echo "INFO: Zipping the $WPDIR to : $BACKUPPATH/$WPZIPFILE"
 tar -czf $BACKUPPATH/$WPZIPFILE -C $WPDIR . #turn off verbose and don't keep directory structure
-echo "Wordpress Directory successfully zipped to $BACKUPPATH/$WPZIPFILE"
+echo "INFO: $WPDIR successfully zipped to $BACKUPPATH/$WPZIPFILE"
 
-
+"\\n\\n######### Zipping Wordpress END #########\\n\\n"
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
 #-------------------------------------------------------------------------
+"\\n\\n######### Zipping APACHE BEGIN #########\\n\\n"
+echo "INFO: Zipping $APACHEDIR"
 tar -czf $BACKUPPATH/$APACHECONFIG -C $APACHEDIR . #turn off verbose and don't keep directory structure
+echo "INFO: $APACHEDIR successfully zipped to $BACKUPPATH/$WPZIPFILE"
+"\\n\\n######### Zipping APACHE BEGIN #########\\n\\n"
 
 #-------------------------------------------------------------------------
 # Encrypting files before uploading
 #-------------------------------------------------------------------------
-echo "Encrypting MYSQL FIles"
+"\\n\\n######### Encrypting files BEGIN #########\\n\\n"
+
+echo "INFO: Encrypting MYSQL FIles"
 openssl enc -aes-256-cbc -in $BACKUPPATH/$WPSQLFILE -out $BACKUPPATH/$WPSQLFILE.enc -k $ENCKEY
 rm $BACKUPPATH/$WPSQLFILE #remove unencrypted file
 
-echo "Encrypting TAR file:"
+echo "INFO: Encrypting Wordpress Backup file:"
 openssl enc -aes-256-cbc -in $BACKUPPATH/$WPZIPFILE -out $BACKUPPATH/$WPZIPFILE.enc -k $ENCKEY
 rm $BACKUPPATH/$WPZIPFILE #remove unencrypted file
 
-echo "encrypting Apache Configuration"
+echo "INFO: Encrypting Apache Configuration"
 openssl enc -aes-256-cbc -in $BACKUPPATH/$APACHECONFIG -out $BACKUPPATH/$APACHECONFIG.enc -k $ENCKEY
 rm $BACKUPPATH/$APACHECONFIG #remove unencrypted file
 
+
+
 # Encrypt wp-config.php file
 if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
-    echo "Encrypting wp-config.php file in $WPCONFDIR"   
+    echo "INFO: Encrypting wp-config.php file in $WPCONFDIR"   
     openssl enc -aes-256-cbc -in $WPCONFDIR/$WPCONFIGFILE -out $BACKUPPATH/$WPCONFIGFILE.enc -k $ENCKEY
 else
-    echo "wp-config.php file is in the wordpress directory, no separate zipping necessary"
+    echo "INFO: wp-config.php file is in the wordpress directory, no separate zipping necessary"
 fi
 
 openssl enc -aes-256-cbc -in $WPSETTINGSFILE -out $BACKUPPATH/$WPSETTINGSFILENAME.enc -k $ENCKEY
+echo "WARNING: The encryption key in $ENCKEYFILE will not be uploaded to Dropbox"
+echo "WARNING: Store $ENCKEYFILE in a safe place"
+"\\n\\n######### Encrypting files END #########\\n\\n"
 
 #-------------------------------------------------------------------------
 # Upload to Dropbox
 #-------------------------------------------------------------------------
+"\\n\\n######### Upload to Dropbox BEGIN #########\\n\\n"
+
+echo "INFO: Uploading Files to Dropbox"
 $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSQLFILE.enc /
 $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPZIPFILE.enc /
 $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG.enc /
@@ -123,3 +152,24 @@ if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
     $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILE.enc /
 fi
 $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSETTINGSFILENAME.enc /
+
+"\\n\\n######### Upload to Dropbox END #########\\n\\n"
+
+#-------------------------------------------------------------------------
+# Lets Encrypt
+#-------------------------------------------------------------------------
+"\\n\\n######### LetsEncrypt BEGIN #########\\n\\n"
+If [ -d $LETSENCRYPTDIR ]; then
+    echo "INFO: LetsEncrypt detected, backing up files"
+    tar -czf $BACKUPPATH/$LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
+    echo "INFO: Encrypting Letsencrypt Configuration"
+    openssl enc -aes-256-cbc -in $BACKUPPATH/$LETSENCRYPTCONFIG -out $BACKUPPATH/$LETSENCRYPTCONFIG.enc -k $ENCKEY
+    rm $BACKUPPATH/$LETSENCRYPTCONFIG #remove unencrypted file
+    echo "INFO: Uploading Letsencrypt to Dropbox"
+    $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$LETSENCRYPTCONFIG.enc
+else
+    echo "LetsEncrypt not found"
+fi
+"\\n\\n######### LetsEncrypt BEGIN #########\\n\\n"
+
+echo "END"
