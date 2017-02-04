@@ -31,7 +31,7 @@ fi
 # Command line parameters
 #---------------------------------------------------------------------------------------
 
-echo -e "######### COMMAND LINE PARAMETERS BEGIN #########\\n"
+echo -e "\\n\\n######### COMMAND LINE PARAMETERS BEGIN #########"
 
 while [[ $# -gt 1 ]]
 do
@@ -137,7 +137,7 @@ else
 	fi
 fi
 
-echo -e "######### COMMAND LINE PARAMETERS END #########\\n\\n"
+echo -e "######### COMMAND LINE PARAMETERS END #########"
 
 #---------------------------------------------------------------------------------------
 # Global Constants
@@ -162,18 +162,21 @@ EIGHTSPACES="        " #used for tab-ing the $DOMAIN.conf file, literally 8 spac
 #---------------------------------------------------------------------------------------
 # DNS Update with Cloudflare - (done first because it takes time to propagate)
 #---------------------------------------------------------------------------------------
+echo -e "\\n\\n######### CLOUDFLARE UPDATE #########"
 
 if [ "$DNSUPDATE" = true ]; then
-	echo -e "\\n\\n######### CLOUDFLARE UPDATE #########"
+	
 	echo "INFO: Updating cloudflare record $CFRECORD in zone $CFZONE using credentials $CFEMAIL , $CFKEY "
 	./cloudflare.sh --email $CFEMAIL --key $CFKEY --zone $CFZONE --record $CFRECORD
 	echo "INFO: Removing Cloudflare script"
 	rm cloudflare.sh #you only need it once
 	echo "GOOD: Cloudflare update complete"
-	echo -e "######### CLOUDFLARE UPDATE COMPLETE#########"
+	
 else
 	echo "WARNING: DNS wasn't updated"
 fi
+
+echo -e "######### CLOUDFLARE UPDATE COMPLETE#########"
 
 #---------------------------------------------------------------------------------------
 # Main-Initilization
