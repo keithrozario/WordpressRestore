@@ -21,7 +21,7 @@ ENCKEYFILE=/var/.enckey
 #-------------------------------------------------------------------------
 # Check if WPSETTINGSFILE and ENCKEY are present
 #-------------------------------------------------------------------------
-echo -e "\\n######### Checking for .wpsettings and enckey #########\\n"
+echo -e "\\n######### Checking for .wpsettings and enckey BEGIN #########\\n"
 
 if [ -f $WPSETTINGSFILE ]; then
     source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
@@ -39,7 +39,7 @@ else
     exit 0
 fi
 
-echo -e "\\n######### Check end #########\\n"
+echo -e "\\n######### END #########\\n"
 #-------------------------------------------------------------------------
 # Global Constants
 #-------------------------------------------------------------------------
@@ -62,7 +62,7 @@ LETSENCRYPTDIR=/etc/letsencrypt
 #-------------------------------------------------------------------------
 # Delete Previous files if they exist (ensure idempotency)
 #-------------------------------------------------------------------------
-echo -e "\\n######### Creating Backup Path #########\\n"
+echo -e "\\n######### Creating Backup Path BEGIN #########\\n"
 if [ -d $BACKUPPATH ]; then
     echo "WARNING: Removing older version of $BACKUPPATH"
     rm -r $BACKUPPATH #remove current directory (to avoid conflicts)
@@ -71,11 +71,11 @@ else
     echo "$BACKUPPATH not found, creating path"
     mkdir $BACKUPPATH
 fi
-echo -e "\\n######### Backup Path created #########\\n"
+echo -e "\\n#########    END    #########\\n"
 #-------------------------------------------------------------------------
 # mysqldump the MYSQL Database
 #-------------------------------------------------------------------------
-echo -e "\\n######### Backing Up Mysql Database #########\\n"
+echo -e "\\n######### Backing Up Mysql Database BEGIN #########\\n"
 
 WPDBNAME=`cat $WPCONFDIR/wp-config.php | grep DB_NAME | cut -d \' -f 4`
 WPDBUSER=`cat $WPCONFDIR/wp-config.php | grep DB_USER | cut -d \' -f 4`
@@ -90,18 +90,18 @@ else
     echo "GOOD: MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 fi
 
-echo -e "\\n######### Database Backup Complete #########\\n"
+echo -e "\\n#########    END    #########\\n"
 
 #-------------------------------------------------------------------------
 # Zip $WPDIR folder
 #-------------------------------------------------------------------------
-echo -e "\\n######### Zipping Wordpress #########\\n"
+echo -e "\\n######### Zipping Wordpress BEGIN #########\\n"
 
 echo "INFO: Zipping the $WPDIR to : $BACKUPPATH/$WPZIPFILE"
 tar -czf $BACKUPPATH/$WPZIPFILE -C $WPDIR . #turn off verbose and don't keep directory structure
 echo "INFO: $WPDIR successfully zipped to $BACKUPPATH/$WPZIPFILE"
 
-echo -e "\\n######### Zipping Wordpress END #########\\n"
+echo -e "\\n#########    END    #########\\n"
 #-------------------------------------------------------------------------
 # Copy all Apache Configurations files
 #-------------------------------------------------------------------------
@@ -111,7 +111,7 @@ echo "INFO: Zipping $APACHEDIR"
 tar -czf $BACKUPPATH/$APACHECONFIG -C $APACHEDIR . #turn off verbose and don't keep directory structure
 echo "INFO: $APACHEDIR successfully zipped to $BACKUPPATH/$WPZIPFILE"
 
-echo -e "\\n######### Zipping APACHE BEGIN #########\\n"
+echo -e "\\n#########    END    #########\\n"
 
 #-------------------------------------------------------------------------
 # Encrypting files before uploading
@@ -143,7 +143,8 @@ fi
 openssl enc -aes-256-cbc -in $WPSETTINGSFILE -out $BACKUPPATH/$WPSETTINGSFILENAME.enc -k $ENCKEY
 echo -e "WARNING: The encryption key in $ENCKEYFILE will not be uploaded to Dropbox"
 echo -e "WARNING: Store $ENCKEYFILE in a safe place"
-echo -e "\\n######### Encrypting files END #########\\n"
+
+echo -e "\\n#########    END    #########\\n"
 
 #-------------------------------------------------------------------------
 # Upload to Dropbox
@@ -159,7 +160,7 @@ if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
 fi
 $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSETTINGSFILENAME.enc /
 
-echo -e "\\n######### Upload to Dropbox END #########\\n"
+echo -e "\\n#########    END    #########\\n"
 
 #-------------------------------------------------------------------------
 # Lets Encrypt
@@ -176,6 +177,6 @@ if [ -d $LETSENCRYPTDIR ]; then
 else
     echo -e "LetsEncrypt not found"
 fi
-echo -e "\\n######### LetsEncrypt BEGIN #########\\n"
+echo -e "\\n#########    END    #########\\n"
 
-echo -e "END"
+echo -e "\\n#########    SCRIPT END    #########\\n"
