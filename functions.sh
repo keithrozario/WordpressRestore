@@ -53,7 +53,7 @@ echo "INFO: Setting cronjobs for $BACKUPSHNAME in $BACKUPSHDIR"
 
 cp $BACKUPSHNAME $BACKUPSHDIR
 chmod 775 $BACKUPSHDIR/$BACKUPSHNAME
-( crontab -l ; echo "* 23 * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
+( crontab -l ; echo "0 23 * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
 
 }
 
