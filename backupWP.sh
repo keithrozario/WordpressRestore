@@ -33,7 +33,7 @@ fi
 
 if [ -f $ENCKEYFILE ]; then
     source "$ENCKEYFILE" 2>/dev/null #file exist, load variables
-    cho "GOOD: .enckey found"
+    echo "GOOD: .enckey found"
 else 
     echo "ERROR: Unable to find $ENCKEYFILE, please run setup.sh for first time"
     exit 0
