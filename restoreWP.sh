@@ -179,6 +179,7 @@ fi
 #---------------------------------------------------------------------------------------
 echo "INFO: Updating REPO"
 sudo apt-get update >>$LOGFILE
+#we will upgrade after deletion of unwanted packages
 export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 #---------------------------------------------------------------------------------------
@@ -191,7 +192,13 @@ sudo apt-get --purge -y remove php >>$LOGFILE
 sudo apt-get --purge -y remove libapache2-mod-php >>$LOGFILE
 sudo apt-get --purge -y remove php-mcrypt >>$LOGFILE
 sudo apt-get --purge -y remove php-mysql >>$LOGFILE
+audo apt-get --purge -y python-letsencrypt-apache >>$LOGFILE
 
+sudo apt-get autoremove
+sudo apt-get autoclean
+
+echo "INFO: Upgrading installed packages" #do this after deletion to avoid upgrading packages set for deletion
+sudo apt-get upgrade >>$LOGFILE
 
 #---------------------------------------------------------------------------------------
 #Setup DropboxUploader
