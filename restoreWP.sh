@@ -142,6 +142,11 @@ echo -e "######### COMMAND LINE PARAMETERS END #########\\n\\n"
 #---------------------------------------------------------------------------------------
 # Global Constants
 #---------------------------------------------------------------------------------------
+LOGFILE=log.txt
+
+#Installed package names
+MYSQL=mysql-server
+
 
 WPSQLFILE=wordpress.sql
 WPZIPFILE=wordpress.tgz
@@ -172,6 +177,11 @@ if [ "$DNSUPDATE" = true ]; then
 else
 	echo "WARNING: DNS wasn't updated"
 fi
+
+#---------------------------------------------------------------------------------------
+# Remove previous installations if necessary
+#---------------------------------------------------------------------------------------
+sudo apt-get --purge remove -y $MYSQL >>log.txt
 
 
 #---------------------------------------------------------------------------------------
@@ -262,7 +272,7 @@ WPDBPASS=`cat $WPCONFDIR/$WPCONFIGFILE | grep DB_PASSWORD | cut -d \' -f 4`
 # Main-Initilization
 #---------------------------------------------------------------------------------------
 echo "INFO: Updating REPO"
-sudo apt-get update >>log.txt
+sudo apt-get update >>$LOGFILE
 export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 #---------------------------------------------------------------------------------------
@@ -270,7 +280,7 @@ export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 #---------------------------------------------------------------------------------------
 
 echo "INFO: Installing mysql-server"
-sudo -E apt-get -q -y install mysql-server >>log.txt  #non-interactive mysql installation
+sudo -E apt-get -q -y install $MYSQL >>log.txt  #non-interactive mysql installation
 
 #Some security cleaning up on mysql-----------------------------------------------------
 mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
@@ -300,14 +310,14 @@ mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly
 #---------------------------------------------------------------------------------------
 
 echo "INFO: Installing Apache2"
-sudo apt-get -y install apache2 >>log.txt 2>&1 #non-interactive apache2 install
+sudo apt-get -y install apache2 >>$LOGFILE #non-interactive apache2 install
 echo "GOOD: Apache Installed"
 
 echo "INFO: Installing PHP and libapache2-mod-php"
-sudo apt-get -y install php >>log.txt 2>&1
-sudo apt-get -y install libapache2-mod-php >>log.txt 2>&1
-sudo apt-get -y install php-mcrypt >>log.txt 2>&1
-sudo apt-get -y install php-mysql >>log.txt 2>&1
+sudo apt-get -y install php >>$LOGFILE
+sudo apt-get -y install libapache2-mod-php >>$LOGFILE
+sudo apt-get -y install php-mcrypt >>$LOGFILE
+sudo apt-get -y install php-mysql >>$LOGFILE
 echo "GOOD: PHP Installed"
 
 #---------------------------------------------------------------------------------------
@@ -322,7 +332,7 @@ if [ $APRESTORE = 1 ]; then
 	echo "INFO: Removing configurations file--to prevent conflicts"
 	rm -r $APACHEDIR
 	mkdir $APACHEDIR
-	tar -xvf $APACHECONFIG -C $APACHEDIR
+	tar -xzf $APACHECONFIG -C $APACHEDIR .
 	
 else
 	echo "INFO: Setting up Apache default values"
@@ -354,7 +364,7 @@ else
 fi
 
 rm $APACHECONFIG #remove downloaded Apache configurations
-sudo a2enmod rewrite #enable rewrite for permalinks to work
+sudo a2enmod rewrite >>$LOGFILE #enable rewrite for permalinks to work
 sudo service apache2 start
 
 echo "GOOD: LAMP Stack Installed!!"
@@ -372,10 +382,10 @@ ENCKEY=0 #for security reasons set back to 0
 # Swap File creation (1GB) thanks to peteris.rocks for this code: http://bit.ly/2kf7KQm
 #---------------------------------------------------------------------------------------
 
-sudo fallocate -l 1G /swapfile
-sudo chmod 0600 /swapfile
-sudo mkswap /swapfile
-sudo swapon /swapfile
+sudo fallocate -l 1G /swapfile 
+sudo chmod 0600 /swapfile 
+sudo mkswap /swapfile 
+sudo swapon /swapfile 
 echo '/swapfile none swap sw 0 0' | sudo tee -a /etc/fstab
 
 #---------------------------------------------------------------------------------------
@@ -393,12 +403,13 @@ echo y | sudo ufw enable
 
 #Future Feature to ping $Domain and check if IP=this machine, only then proceed
 #While possible to do this automatically, I prefer to use letsencrypt supported script
+sudo apt-get -y install python-letsencrypt-apache >>$LOGFILE
 
 if [ -z "$PRODCERT" ]; then #Check for prodcert
 	echo "Let's encrypt not called, no certificate will be set"
 else
 	echo -e "\\n\\n######### Getting Certs #########\\n\\n"
-	sudo apt-get -y install python-letsencrypt-apache
+	
 	( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
 	( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
 	
