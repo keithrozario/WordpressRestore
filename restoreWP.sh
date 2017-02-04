@@ -381,10 +381,10 @@ else
 	sed -i "s|\(^Order*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
 	sed -i "s|\(^allow*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
 	sed -i "s|\(^</Directory*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i '/#.*/ d' temp.conf #remove all comments in file (nice & clean!)
+	sed -i '/#.*/ d' $SITESAVAILABLEDIR/$DOMAIN.conf #remove all comments in file (nice & clean!)
 	
 	echo "INFO: Enabling $DOMAIN on Apache"
-	a2ensite $DOMAIN	
+	a2ensite $DOMAIN >>log.txt
 	echo "GOOD: $DOMAIN enabled, restarting Apache2 service"
 fi
 
