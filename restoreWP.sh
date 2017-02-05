@@ -205,7 +205,7 @@ sudo apt-get -y autoremove >>$LOGFILE
 sudo apt-get -y autoclean >>$LOGFILE
 
 echo "INFO: Upgrading installed packages" #do this after deletion to avoid upgrading packages set for deletion
-sudo apt-get upgrade >>$LOGFILE
+#sudo apt-get upgrade >>$LOGFILE #Disabled for now
 
 echo -e "\\n\\n######### REPO UPDATE COMPLETE #########\\n\\n"
 
