@@ -426,7 +426,7 @@ ENCKEY=0 #for security reasons set back to 0
 # Swap File creation (1GB) thanks to peteris.rocks for this code: http://bit.ly/2kf7KQm
 #---------------------------------------------------------------------------------------
 swapoff -a #switch of swap -- idempotency
-rm $SWAPFILE
+delFile $SWAPFILE
 sudo fallocate -l 1G $SWAPFILE
 sudo chmod 0600 $SWAPFILE
 sudo mkswap $SWAPFILE
