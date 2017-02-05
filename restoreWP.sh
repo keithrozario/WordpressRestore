@@ -87,7 +87,7 @@ done
 if [ -z "$DBPASS" ]; then #Check DB Parameters
 	echo "INFO: DB Password not provided...creating one"
 
-	apt install pwgen >>log.txt  #generate password using pwgen
+	sudo apt-get install pwgen >>log.txt  #generate password using pwgen
 	DBPASS="$(pwgen -1 -s 64)" >>log.txt
 
 	echo "GOOD: Database parameters generated"
@@ -199,7 +199,7 @@ sudo apt-get --purge -y remove php >>$LOGFILE
 sudo apt-get --purge -y remove libapache2-mod-php >>$LOGFILE
 sudo apt-get --purge -y remove php-mcrypt >>$LOGFILE
 sudo apt-get --purge -y remove php-mysql >>$LOGFILE
-sudo apt-get --purge -y python-letsencrypt-apache >>$LOGFILE
+sudo apt-get --purge -y remove python-letsencrypt-apache >>$LOGFILE
 
 sudo apt-get -y autoremove >>$LOGFILE
 sudo apt-get -y autoclean >>$LOGFILE
@@ -274,12 +274,13 @@ echo -e "\\n\\n######### Downloaded backup files from Dropbox #########\\n\\n"
 echo -e "\\n\\n######### Extracting Wordpress Files #########\\n\\n"
 
 if [ -d $WPDIR ]; then
-echo "WARNING: Removing older version of $WPDIR"
-rm -r $WPDIR #remove current directory (to avoid conflicts)
+	echo "WARNING: Removing older version of $WPDIR"
+	rm -r $WPDIR #remove current directory (to avoid conflicts)
 else 
-echo "GOOD: $WPDIR not found, proceeding to extraction"
+	echo "GOOD: $WPDIR not found, proceeding to extraction"
 fi
 
+echo "INFO: Extracting $WPDIR"
 mkdir -p $WPDIR
 tar -xzf $WPZIPFILE -C $WPDIR .
 
