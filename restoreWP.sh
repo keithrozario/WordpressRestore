@@ -451,16 +451,22 @@ echo -e "\\n\\n######### Let's encrypt #########\\n\\n"
 sudo apt-get -y install python-letsencrypt-apache >>$LOGFILE
 
 if [ -z "$PRODCERT" ]; then #Check for prodcert
-	echo "Let's encrypt not called, attempting to restore from backup"
-	if [ -f $LETSENCRYPTCONFIG ]; then
-		echo "GOOD: $LETSENCRYPTCONFIG found. Restoring configuration from backup"
-		delDir $LETSENCRYPTDIR
-		echo "INFO: Creating $LETSENCRYPTDIR"
-		mkdir $LETSENCRYPTDIR
-		echo "INFO: Extracting Configuration"
-		tar -xzf $LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
+	if [ $APRESTORE = 1 ]; then
+		echo "Let's encrypt not called, attempting to restore from backup"
+		if [ -f $LETSENCRYPTCONFIG ]; then
+			echo "GOOD: $LETSENCRYPTCONFIG found. Restoring configuration from backup"
+			delDir $LETSENCRYPTDIR
+			echo "INFO: Creating $LETSENCRYPTDIR"
+			mkdir $LETSENCRYPTDIR
+			echo "INFO: Extracting Configuration"
+			tar -xzf $LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
+		else
+			echo "WARNING: Letsencrypt.tar not found, looks like you don't have lets encrypt installed"
+		fi
 	else
-		echo "WARNING: Letsencrypt.tar not found, looks like you don't have lets encrypt installed"
+		echo "WARNING: Apache wasn't restored from Backup, unable to restore Lets Encrypt"
+		echo "INFO: Consider installing let's encrypt by using letsencrypt --apache"
+		#no point copying over letsencrypt configs if Apache wasn't restored (fresh install)
 	fi
 else
 	echo -e "\\n\\n######### Getting Certs #########"
