@@ -223,8 +223,8 @@ GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 #---------------------------------------------------------------------------------------
 #Download .wpsettings file
 #---------------------------------------------------------------------------------------
-rm *.enc #remove any old encrypted files
-rm $WPSETTINGSFILEDIR/$WPSETTINGSFILE #remove old wpsettings file
+delFile $WPSETTINGSFILE
+delFile $WPSETTINGSFILEDIR/$WPSETTINGSFILE #remove old wpsettings file (if exists)--functions.sh
 
 echo "INFO: Checking if $WPSETTINGSFILE exist on Dropbox"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
@@ -246,8 +246,8 @@ fi
 delFile $WPSQLFILE #delete files if it exist, functions.sh
 delFile $WPZIPFILE
 delFile $APACHECONFIG
-delFile $WPSETTINGSFILE
 delFile $LETSENCRYPTCONFIG
+delFile $WPCONFIGFILE
 
 echo "INFO: Downloading and decrypting SQL backup file"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
@@ -261,9 +261,9 @@ echo "INFO: Downloading and decrypting Apache configuration"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
 openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
 
-echo "INFO: Downloading and decrypting Apache configuration"
+echo "INFO: Downloading and decrypting LetsEncrypt configuration"
 /var/Dropbox-Uploader/dropbox_uploader.sh download /$LETSENCRYPTCONFIG.enc #zip file with all wordpress contents
-if [-f $LETSENCRYPTCONFIG.enc ]; then
+if [ -f $LETSENCRYPTCONFIG.enc ]; then
 	openssl enc -aes-256-cbc -d -in $LETSENCRYPTCONFIG.enc -out $LETSENCRYPTCONFIG -k $ENCKEY
 else
 	echo "WARNING: Letsencrypt.tar not found"
@@ -377,15 +377,7 @@ if [ $APRESTORE = 1 ]; then
 	rm -r $APACHEDIR
 	mkdir $APACHEDIR
 	tar -xzf $APACHECONFIG -C $APACHEDIR .
-	if [ -f $LETSENCRYPTCONFIG ]; then
-		delDir $LETSENCRYPTDIR
-		echo "INFO: Creating $LETSENCRYPTDIR"
-		mkdir $LETSENCRYPTDIR
-		tar -xzf $LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
-	else
-		echo "WARNING: Letsencrypt.tar not found"
-	fi
-	
+
 else
 	echo "INFO: Setting up Apache default values"
 	echo "### WARNING: Apache config files will not be secured ###"
@@ -459,7 +451,17 @@ echo -e "\\n\\n######### Let's encrypt #########\\n\\n"
 sudo apt-get -y install python-letsencrypt-apache >>$LOGFILE
 
 if [ -z "$PRODCERT" ]; then #Check for prodcert
-	echo "Let's encrypt not called, no certificate will be set"
+	echo "Let's encrypt not called, attempting to restore from backup"
+	if [ -f $LETSENCRYPTCONFIG ]; then
+		echo "GOOD: $LETSENCRYPTCONFIG found. Restoring configuration from backup"
+		delDir $LETSENCRYPTDIR
+		echo "INFO: Creating $LETSENCRYPTDIR"
+		mkdir $LETSENCRYPTDIR
+		echo "INFO: Extracting Configuration"
+		tar -xzf $LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
+	else
+		echo "WARNING: Letsencrypt.tar not found, looks like you don't have lets encrypt installed"
+	fi
 else
 	echo -e "\\n\\n######### Getting Certs #########"
 	
