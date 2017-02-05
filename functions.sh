@@ -105,12 +105,16 @@ function delFile {
 if [ -f $1 ]; then
 	echo "WARNING: Found old $1--deleting to prevent conflicts"
 	rm $1
+else
+	echo "GOOD: No previous versions of $1 detected"
 fi
 }
 
 function delDir {
 if [ -d $1 ]; then
 	echo "WARNING: Found old $1--deleting to prevent conflicts"
-	rm $1
+	rm -r $1
+else
+	echo "GOOD: No previous versions of $1 detected"
 fi
 }
