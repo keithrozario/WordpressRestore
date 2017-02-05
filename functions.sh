@@ -97,3 +97,20 @@ else
   echo "DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
 fi
 }
+
+#---------------------------------------------------------------------------------------
+# delete file / dir if exist
+#---------------------------------------------------------------------------------------
+function delFile {
+if [ -f $1 ]; then
+	echo "WARNING: Found old $1--deleting to prevent conflicts"
+	rm $1
+fi
+}
+
+function delDir {
+if [ -d $1 ]; then
+	echo "WARNING: Found old $1--deleting to prevent conflicts"
+	rm $1
+fi
+}
