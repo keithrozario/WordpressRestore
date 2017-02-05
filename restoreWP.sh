@@ -127,6 +127,7 @@ if [ -z "$APRESTORE" ]; then #Restore Apache or build from scratch
 		exit 0
 	else
 		echo "GOOD: Apache Domain set to $DOMAIN"
+		APRESTORE=0 #set to not 1.
 	fi
 else
 	if [ $APRESTORE = 1 ]; then
