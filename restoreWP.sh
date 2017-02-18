@@ -20,10 +20,10 @@
 #-------------------------------------------------------------------------
 FUNCTIONSFILE=functions.sh
 if [ -f $FUNCTIONSFILE ]; then
-	echo "Loading $FUNCTIONSFILE"
-	source "$FUNCTIONSFILE" 2>/dev/null #file exist, load variables
+	echo "INFO: Loading $FUNCTIONSFILE"
+	sudo source "$FUNCTIONSFILE" 2>/dev/null #file exist, load variables
 else 
-	echo "Unable to find $FUNCTIONSFILE, please run setup.sh for first time"
+	echo "ERROR: Unable to find $FUNCTIONSFILE, please run setup.sh for first time"
     	exit 0
 fi
 
@@ -476,10 +476,10 @@ else
 	
 	if [ $PRODCERT = 1 ]; then
 		echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
-		letsencrypt --apache 
+		sudo letsencrypt --apache 
 	else
 		echo "Obtaining staging certs (for test)"
-		letsencrypt --apache --staging
+		sudo letsencrypt --apache --staging
 	fi
 fi
 echo -e "\\n\\n######### Let's encrypt COMPLETE #########\\n\\n"
