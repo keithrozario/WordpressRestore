@@ -21,7 +21,8 @@
 FUNCTIONSFILE=functions.sh
 if [ -f $FUNCTIONSFILE ]; then
 	echo "INFO: Loading $FUNCTIONSFILE"
-	sudo source "$FUNCTIONSFILE" 2>/dev/null #file exist, load variables
+	source $FUNCTIONSFILE #file exist, load variables
+	echo $FUNCTIONSFILEMESSAGE
 else 
 	echo "ERROR: Unable to find $FUNCTIONSFILE, please run setup.sh for first time"
     	exit 0
