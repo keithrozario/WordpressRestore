@@ -191,7 +191,7 @@ echo -e "\\n\\n######### REPO UPDATE #########\\n\\n"
 echo "INFO: Updating REPO"
 sudo apt-get update >>$LOGFILE
 #we will upgrade after deletion of unwanted packages
-sudo export DEBIAN_FRONTEND=noninteractive #Silence all interactions
+export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 #---------------------------------------------------------------------------------------
 # Remove previous installations if necessary
@@ -227,11 +227,11 @@ delFile $WPSETTINGSFILE
 delFile $WPSETTINGSFILEDIR/$WPSETTINGSFILE #remove old wpsettings file (if exists)--functions.sh
 
 echo "INFO: Checking if $WPSETTINGSFILE exist on Dropbox"
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
+sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
 
 if [ -f $WPSETTINGSFILE.enc ]; then
 	echo "GOOD: $WPSETTINGSFILE exist, decrypting and loading"
-	openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
+	sudo openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
 	echo "INFO: Loading $WPSETTINGSFILE"
 	source "$WPSETTINGSFILEDIR/$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
 else 
@@ -250,21 +250,21 @@ delFile $LETSENCRYPTCONFIG
 delFile $WPCONFIGFILE
 
 echo "INFO: Downloading and decrypting SQL backup file"
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
-openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY 
+sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
+sudo openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY 
 
 echo "INFO: Downloading and decrypting Wordpress zip file"
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
-openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
+sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
+sudo openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
 echo "INFO: Downloading and decrypting Apache configuration"
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
-openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
+sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
+sudo openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
 
 echo "INFO: Downloading and decrypting LetsEncrypt configuration"
-/var/Dropbox-Uploader/dropbox_uploader.sh download /$LETSENCRYPTCONFIG.enc #zip file with all wordpress contents
+sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$LETSENCRYPTCONFIG.enc #zip file with all wordpress contents
 if [ -f $LETSENCRYPTCONFIG.enc ]; then
-	openssl enc -aes-256-cbc -d -in $LETSENCRYPTCONFIG.enc -out $LETSENCRYPTCONFIG -k $ENCKEY
+	sudo openssl enc -aes-256-cbc -d -in $LETSENCRYPTCONFIG.enc -out $LETSENCRYPTCONFIG -k $ENCKEY
 else
 	echo "WARNING: Letsencrypt.tar not found"
 fi
@@ -273,8 +273,8 @@ if [ "$WPDIR" = "$WPCONFDIR" ]; then
 	echo "INFO: wp-config is in $WPZIPFILE, no further downloads required"
 else
 	echo "INFO: wp-config is a separate file, downloading $WPCONFIGFILE from Dropbox"
-	/var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILE.enc #encrypted Wp-config.php file
-	openssl enc -aes-256-cbc -d -in $WPCONFIGFILE.enc -out $WPCONFIGFILE -k $ENCKEY
+	sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILE.enc #encrypted Wp-config.php file
+	sudo openssl enc -aes-256-cbc -d -in $WPCONFIGFILE.enc -out $WPCONFIGFILE -k $ENCKEY
 fi
 
 sudo rm *.enc #remove encrypted files after decryption
@@ -294,7 +294,7 @@ fi
 
 echo "INFO: Extracting $WPDIR"
 sudo mkdir -p $WPDIR
-tar -xzf $WPZIPFILE -C $WPDIR .
+sudo tar -xzf $WPZIPFILE -C $WPDIR .
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
 	echo "INFO: wp-config file is part of $WPDIR, no further action required"
@@ -326,27 +326,27 @@ echo "INFO: Installing mysql-server"
 sudo -E apt-get -q -y install mysql-server >>$LOGFILE  #non-interactive mysql installation
 
 #Some security cleaning up on mysql-----------------------------------------------------
-mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
+sudo mysql -u root -e "DELETE FROM mysql.user WHERE User='';"
 echo "INFO: Setting password for root user to $DBPASS"
-mysql -u root -e "UPDATE mysql.user SET authentication_string=PASSWORD('$DBPASS') WHERE User='root';"
-mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
-mysql -u root -e "DROP DATABASE IF EXISTS test;"
-mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
-mysql -u root -e "FLUSH PRIVILEGES;"
+sudo mysql -u root -e "UPDATE mysql.user SET authentication_string=PASSWORD('$DBPASS') WHERE User='root';"
+sudo mysql -u root -e "DELETE FROM mysql.user WHERE User='root' AND Host NOT IN ('localhost', '127.0.0.1', '::1');"
+sudo mysql -u root -e "DROP DATABASE IF EXISTS test;"
+sudo mysql -u root -e "DELETE FROM mysql.db WHERE Db='test' OR Db='test\\_%';"
+sudo mysql -u root -e "FLUSH PRIVILEGES;"
 
 #Create DB for Wordpress with user------------------------------------------------------
 echo "INFO: Creating Database with name $WPDBNAME"
-mysql -u root -e "CREATE DATABASE IF NOT EXISTS $WPDBNAME;"
+sudo mysql -u root -e "CREATE DATABASE IF NOT EXISTS $WPDBNAME;"
 echo "INFO: Granting Permission to $WPDBUSER with password: $WPDBPASS"
-mysql -u root -e "GRANT ALL ON *.* TO '$WPDBUSER'@'localhost' IDENTIFIED BY '$WPDBPASS';"
-mysql -u root -e "FLUSH PRIVILEGES;"
+sudo mysql -u root -e "GRANT ALL ON *.* TO '$WPDBUSER'@'localhost' IDENTIFIED BY '$WPDBPASS';"
+sudo mysql -u root -e "FLUSH PRIVILEGES;"
 
 #Setup permission for my.cnf propery----------------------------------------------------
-chmod 644 /etc/mysql/my.cnf
+sudo chmod 644 /etc/mysql/my.cnf
 
 #Extract mysqlfiles---------------------------------------------------------------------
 echo "INFO: Loading $WPSQLFILE into database $WPDBNAME"
-mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
+sudo mysql $WPDBNAME < $WPSQLFILE -u $WPDBUSER -p$WPDBPASS #load .sql file into newly created DB
 
 echo -e "\\n\\n######### MYSQL Server Installed #########\\n\\n"
 #---------------------------------------------------------------------------------------
@@ -374,33 +374,33 @@ sudo service apache2 stop
 if [ $APRESTORE = 1 ]; then
 
 	echo "INFO: Removing configurations file--to prevent conflicts"
-	sudo rm -r $APACHEDIR
-	sudo mkdir $APACHEDIR
-	tar -xzf $APACHECONFIG -C $APACHEDIR .
+	delDir $APACHEDIR
+	delFile $APACHEDIR
+	sudo tar -xzf $APACHECONFIG -C $APACHEDIR .
 
 else
 	echo "INFO: Setting up Apache default values"
 	echo "### WARNING: Apache config files will not be secured ###"
 	echo "### Consider modifying the config files post-install ###"
 	echo "INFO: Copying 000-default config for $DOMAIN.conf"
-	cp $SITESAVAILABLEDIR/$DEFAULTAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
+	sudo cp $SITESAVAILABLEDIR/$DEFAULTAPACHECONF $SITESAVAILABLEDIR/$DOMAIN.conf #create a temporary Apache Configuration
 	
 	echo "INFO: Updating $DOMAIN.conf"	
-	sed -i "/ServerAdmin*/aServerName $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerName setting
-	sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
-	sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
-	sed -i "/DocumentRoot*/a<Directory $WPDIR>\nAllowOverride All\nOrder allow,deny\nallow from all\n</Directory>" $SITESAVAILABLEDIR/$DOMAIN.conf
-	sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
+	sudo sed -i "/ServerAdmin*/aServerName $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerName setting
+	sudo sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
+	sudo sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
+	sudo sed -i "/DocumentRoot*/a<Directory $WPDIR>\nAllowOverride All\nOrder allow,deny\nallow from all\n</Directory>" $SITESAVAILABLEDIR/$DOMAIN.conf
+	sudo sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
 	
 	#Format $DOMAIN.conf file
-	sed -i "s|\(^ServerName*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i "s|\(^ServerAlias*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i "s|\(^<Directory*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i "s|\(^AllowOverride*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i "s|\(^Order*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i "s|\(^allow*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i "s|\(^</Directory*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
-	sed -i '/#.*/ d' $SITESAVAILABLEDIR/$DOMAIN.conf #remove all comments in file (nice & clean!)
+	sudo sed -i "s|\(^ServerName*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sudo sed -i "s|\(^ServerAlias*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sudo sed -i "s|\(^<Directory*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sudo sed -i "s|\(^AllowOverride*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sudo sed -i "s|\(^Order*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sudo sed -i "s|\(^allow*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sudo sed -i "s|\(^</Directory*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
+	sudo sed -i '/#.*/ d' $SITESAVAILABLEDIR/$DOMAIN.conf #remove all comments in file (nice & clean!)
 	
 	echo "INFO: Enabling $DOMAIN on Apache"
 	sudo a2ensite $DOMAIN >>log.txt
@@ -459,7 +459,7 @@ if [ -z "$PRODCERT" ]; then #Check for prodcert
 			echo "INFO: Creating $LETSENCRYPTDIR"
 			sudo mkdir $LETSENCRYPTDIR
 			echo "INFO: Extracting Configuration"
-			tar -xzf $LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
+			sudo tar -xzf $LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
 		else
 			echo "WARNING: Letsencrypt.tar not found, looks like you don't have lets encrypt installed"
 		fi
