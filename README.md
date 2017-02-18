@@ -43,9 +43,9 @@ chmod +x *.sh <br><br>
 The access token for your dropbox account, refer to http://bit.ly/2iT95IT to get one<br>
 <li><b>--enckey</b> ENCRYPTION_KEY_FOR_BACKUPS <b>[MANDATORY]</b><br>
 A user supplied decryption key to decrypt backups (all files uploaded to backup dir are encrypted)<br>
-<li><b>--aprestore</b>APACHE Restore Flag <i>[OPTIONAL]</i><br>
-<i>Optional:</i> Set to 1 to restore Apache from backup, leave empty to allow script to configure apache automatically<br>
-<li><b>--domain</b>APACHE Restore Flag <i>[CONDITIONAL]</i><br>
+<li><b>--aprestore</b> APACHE Restore Flag <i>[OPTIONAL]</i><br>
+<i>Optional:</i> Set to 1 to restore Apache from backup, do not call to allow script to build from scratch
+<li><b>--domain</b> Website Domain <i>[CONDITIONAL]</i><br>
 <i>Conditional:</i>Set to domain (e.g. www.example.com) if aprestore is not set <br>
 <li><b>--cfemail</b> CLOUDFLARE_EMAIL_ADDRESS <i>[OPTIONAL]</i><br>
 <i>Optional:</i> Email Address for your cloudflare account <br>
@@ -61,9 +61,9 @@ A user supplied decryption key to decrypt backups (all files uploaded to backup 
 The password for root on the database you're about to create, script will generate random pass if not supplied with one <br>
 </ul>
 <br><i>
-*if --prodcert is set to 1, Cronjobs will be creates for letsencrypt renew to run twice a day (6am and 11pm) <br>
-*if --prodcert is set to 0, lets encrypt will call on test certificates, cronjobs will still be created <br>
-*if --prodcert is not set, let's encrypt step is bypassed <br>
+*if --prodcert is set to 1, Cronjobs will be created for "letsencrypt renew" to run twice a day (6am and 11pm) <br>
+*if --prodcert is set to 0, lets encrypt will call test certificates, cronjobs will still be created <br>
+*if --prodcert is not set, let's encrypt step is bypassed, no cronjobs created, or certificates called <br>
 </i>
 
 <h2>Special Thanks</h2>
