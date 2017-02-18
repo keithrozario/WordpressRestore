@@ -191,7 +191,7 @@ echo -e "\\n\\n######### REPO UPDATE #########\\n\\n"
 echo "INFO: Updating REPO"
 sudo apt-get update >>$LOGFILE
 #we will upgrade after deletion of unwanted packages
-export DEBIAN_FRONTEND=noninteractive #Silence all interactions
+sudo export DEBIAN_FRONTEND=noninteractive #Silence all interactions
 
 #---------------------------------------------------------------------------------------
 # Remove previous installations if necessary
@@ -277,7 +277,7 @@ else
 	openssl enc -aes-256-cbc -d -in $WPCONFIGFILE.enc -out $WPCONFIGFILE -k $ENCKEY
 fi
 
-rm *.enc #remove encrypted files after decryption
+sudo rm *.enc #remove encrypted files after decryption
 echo -e "\\n\\n######### Downloaded backup files from Dropbox #########\\n\\n"
 
 #---------------------------------------------------------------------------------------
@@ -287,20 +287,20 @@ echo -e "\\n\\n######### Extracting Wordpress Files #########\\n\\n"
 
 if [ -d $WPDIR ]; then
 	echo "WARNING: Removing older version of $WPDIR"
-	rm -r $WPDIR #remove current directory (to avoid conflicts)
+	sudo rm -r $WPDIR #remove current directory (to avoid conflicts)
 else 
 	echo "GOOD: $WPDIR not found, proceeding to extraction"
 fi
 
 echo "INFO: Extracting $WPDIR"
-mkdir -p $WPDIR
+sudo mkdir -p $WPDIR
 tar -xzf $WPZIPFILE -C $WPDIR .
 
 if [ "$WPDIR" = "$WPCONFDIR" ]; then
 	echo "INFO: wp-config file is part of $WPDIR, no further action required"
 else
 	echo "INFO: wp-config is a separate file, moving it to $WPCONFDIR"
-	mv $WPCONFIGFILE $WPCONFDIR
+	sudo mv $WPCONFIGFILE $WPCONFDIR
 	echo "INFO: wp-config file moved to $WPCONFDIR"
 fi
 
@@ -374,8 +374,8 @@ sudo service apache2 stop
 if [ $APRESTORE = 1 ]; then
 
 	echo "INFO: Removing configurations file--to prevent conflicts"
-	rm -r $APACHEDIR
-	mkdir $APACHEDIR
+	sudo rm -r $APACHEDIR
+	sudo mkdir $APACHEDIR
 	tar -xzf $APACHECONFIG -C $APACHEDIR .
 
 else
@@ -403,11 +403,11 @@ else
 	sed -i '/#.*/ d' $SITESAVAILABLEDIR/$DOMAIN.conf #remove all comments in file (nice & clean!)
 	
 	echo "INFO: Enabling $DOMAIN on Apache"
-	a2ensite $DOMAIN >>log.txt
+	sudo a2ensite $DOMAIN >>log.txt
 	echo "GOOD: $DOMAIN enabled, restarting Apache2 service"
 fi
 
-rm $APACHECONFIG #remove downloaded Apache configurations
+sudo rm $APACHECONFIG #remove downloaded Apache configurations
 sudo a2enmod rewrite >>$LOGFILE #enable rewrite for permalinks to work
 sudo service apache2 start
 
@@ -425,7 +425,7 @@ ENCKEY=0 #for security reasons set back to 0
 #---------------------------------------------------------------------------------------
 # Swap File creation (1GB) thanks to peteris.rocks for this code: http://bit.ly/2kf7KQm
 #---------------------------------------------------------------------------------------
-swapoff -a #switch of swap -- idempotency
+sudo swapoff -a #switch of swap -- idempotency
 delFile $SWAPFILE
 sudo fallocate -l 1G $SWAPFILE
 sudo chmod 0600 $SWAPFILE
@@ -457,7 +457,7 @@ if [ -z "$PRODCERT" ]; then #Check for prodcert
 			echo "GOOD: $LETSENCRYPTCONFIG found. Restoring configuration from backup"
 			delDir $LETSENCRYPTDIR
 			echo "INFO: Creating $LETSENCRYPTDIR"
-			mkdir $LETSENCRYPTDIR
+			sudo mkdir $LETSENCRYPTDIR
 			echo "INFO: Extracting Configuration"
 			tar -xzf $LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
 		else
