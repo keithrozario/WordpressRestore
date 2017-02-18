@@ -26,17 +26,17 @@ URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Gi
 DROPBOXPATH=/var/Dropbox-Uploader
 
 if [ -d $DROPBOXPATH ]; then
-  echo "Dropbox downloader may have been downloaded before, removing directory $DROPBOXPATH"
-  rm -r $DROPBOXPATH
-  rm $DROPBOXUPLOADERFILE
+  echo "WARNING: Dropbox downloader may have been downloaded before, removing directory $DROPBOXPATH"
+  sudo rm -r $DROPBOXPATH
+  sudo rm $DROPBOXUPLOADERFILE
 fi  
   
-echo "Saving Token : $DROPBOXTOKEN to file"
-echo "OAUTH_ACCESS_TOKEN=$DROPBOXTOKEN" > $DROPBOXUPLOADERFILE
-chmod 440 $DROPBOXUPLOADERFILE
-echo "Downloading DropboxDownloader from $URLDROPBOXDOWNLOADER"
-git clone $URLDROPBOXDOWNLOADER $DROPBOXPATH
-chmod +x $DROPBOXPATH/dropbox_uploader.sh
+sudo echo "INFO: Saving Token : $DROPBOXTOKEN to file"
+sudo echo "OAUTH_ACCESS_TOKEN=$DROPBOXTOKEN" > $DROPBOXUPLOADERFILE
+sudo chmod 440 $DROPBOXUPLOADERFILE
+sudo echo "INFO: Downloading DropboxDownloader from $URLDROPBOXDOWNLOADER"
+sudo git clone $URLDROPBOXDOWNLOADER $DROPBOXPATH
+sudo chmod +x $DROPBOXPATH/dropbox_uploader.sh
 
 }
 
@@ -51,9 +51,9 @@ BACKUPSHNAME=backupWP.sh
 
 echo "INFO: Setting cronjobs for $BACKUPSHNAME in $BACKUPSHDIR"
 
-cp $BACKUPSHNAME $BACKUPSHDIR
-chmod 775 $BACKUPSHDIR/$BACKUPSHNAME
-( crontab -l ; echo "0 23 * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
+sudo cp $BACKUPSHNAME $BACKUPSHDIR
+sudo chmod 775 $BACKUPSHDIR/$BACKUPSHNAME
+sudo ( crontab -l ; echo "0 23 * * * $BACKUPSHDIR/$BACKUPSHNAME" ) | crontab - #cron-job the backup-script
 
 }
 
@@ -67,14 +67,14 @@ ENCKEY=$1
 
 if [ -f $ENCKEYFILE ]; then
   echo "WARNING: Removing old $ENCKEYFILE, (probably from old installation)"
-  rm $ENCKEYFILE #remove older one if exists
+  sudo rm $ENCKEYFILE #remove older one if exists
   echo "INFO: $ENCKEYFILE removed"
 else
   echo "GOOD: No $ENCKEYFILE found, looks like this is the first install"
 fi
 
 
-echo "ENCKEY=$ENCKEY" > $ENCKEYFILE #store wpconfigpass in config file
+sudo echo "ENCKEY=$ENCKEY" > $ENCKEYFILE #store wpconfigpass in config file
 }
 
 #---------------------------------------------------------------------------------------
@@ -89,12 +89,12 @@ DROPBOXPATH=$3
 
 if [ -f $WPSETTINGSFILE ]; then
 	echo "WARNING: Older $WPSETTINGSFILE detected, deleting it" 
-	rm $WPSETTINGSFILE
+	sudo rm $WPSETTINGSFILE
 else 
 	echo "GOOD: no $WPSETTINGSFILE found --- creating one"
-  echo "WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
-  echo "WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
-  echo "DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
+  	sudo echo "INFO: WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
+  	sudo echo "INFO: WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
+  	sudo echo "INFO: DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
 fi
 }
 
@@ -104,7 +104,7 @@ fi
 function delFile {
 if [ -f $1 ]; then
 	echo "WARNING: Found old $1--deleting to prevent conflicts"
-	rm $1
+	sudo rm $1
 else
 	echo "GOOD: No previous versions of $1 detected"
 fi
@@ -113,7 +113,7 @@ fi
 function delDir {
 if [ -d $1 ]; then
 	echo "WARNING: Found old $1--deleting to prevent conflicts"
-	rm -r $1
+	sudo rm -r $1
 else
 	echo "GOOD: No previous versions of $1 detected"
 fi
