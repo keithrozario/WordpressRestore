@@ -14,6 +14,31 @@
 # Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 #
 
+FUNCTIONSFILEMESSAGE="INFO: Functions file loaded" #message to load to prove functions.sh was loaded correctly
+
+#---------------------------------------------------------------------------------------
+# delete file / dir if exist
+#---------------------------------------------------------------------------------------
+function delFile {
+if [ -f $1 ]; then
+	echo "WARNING: Found old $1--deleting to prevent conflicts"
+	sudo rm $1
+else
+	echo "GOOD: No previous versions of $1 detected"
+fi
+}
+
+function delDir {
+if [ -d $1 ]; then
+	echo "WARNING: Found old $1--deleting to prevent conflicts"
+	sudo rm -r $1
+else
+	echo "GOOD: No previous versions of $1 detected"
+fi
+}
+
+
+
 #---------------------------------------------------------------------------------------
 # GetDropboxUploader
 #---------------------------------------------------------------------------------------
@@ -27,14 +52,14 @@ DROPBOXPATH=/var/Dropbox-Uploader
 
 if [ -d $DROPBOXPATH ]; then
   echo "WARNING: Dropbox downloader may have been downloaded before, removing directory $DROPBOXPATH"
-  sudo rm -r $DROPBOXPATH
-  sudo rm $DROPBOXUPLOADERFILE
+  delDir rm -r $DROPBOXPATH
+  delFile rm $DROPBOXUPLOADERFILE
 fi  
   
-sudo echo "INFO: Saving Token : $DROPBOXTOKEN to file"
+echo "INFO: Saving Token : $DROPBOXTOKEN to file"
 sudo echo "OAUTH_ACCESS_TOKEN=$DROPBOXTOKEN" > $DROPBOXUPLOADERFILE
-sudo chmod 440 $DROPBOXUPLOADERFILE
-sudo echo "INFO: Downloading DropboxDownloader from $URLDROPBOXDOWNLOADER"
+chmod 440 $DROPBOXUPLOADERFILE
+echo "INFO: Downloading DropboxDownloader from $URLDROPBOXDOWNLOADER"
 sudo git clone $URLDROPBOXDOWNLOADER $DROPBOXPATH
 sudo chmod +x $DROPBOXPATH/dropbox_uploader.sh
 
@@ -98,23 +123,3 @@ else
 fi
 }
 
-#---------------------------------------------------------------------------------------
-# delete file / dir if exist
-#---------------------------------------------------------------------------------------
-function delFile {
-if [ -f $1 ]; then
-	echo "WARNING: Found old $1--deleting to prevent conflicts"
-	sudo rm $1
-else
-	echo "GOOD: No previous versions of $1 detected"
-fi
-}
-
-function delDir {
-if [ -d $1 ]; then
-	echo "WARNING: Found old $1--deleting to prevent conflicts"
-	sudo rm -r $1
-else
-	echo "GOOD: No previous versions of $1 detected"
-fi
-}
