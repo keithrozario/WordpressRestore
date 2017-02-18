@@ -21,7 +21,7 @@ chmod +x *.sh <br><br>
 ./setup.sh --dropboxtoken [xxx] --enckey [xxx] --wpdir [xxx] --wpconfdir [xxx] <br>
 <ul>
 <li><b>--dropboxtoken</b> DROPBOX ACCESS TOKEN <b>[MANDATORY]</b><br>
-The access token for your dropbox account, refer to http://bit.ly/2it95it to get one<br>
+The access token for your dropbox account, refer to http://bit.ly/2iT95IT to get one<br>
 <li><b>--enckey</b> ENCRYPTION KEY FOR BACKUPS <b>[MANDATORY]</b><br>
 A user supplied encryption key to encrypt backups (all filed uploaded to backup dir are encrypted)<br>
 <li><b>--wpdir</b> WORDPRESS DIRECTORY <i>[OPTIONAL]</i><br>
@@ -40,7 +40,7 @@ chmod +x *.sh <br><br>
 ./restoreWP.sh --dropboxtoken [xxx] --enckey [xxxx] --aprestore [x] --domain [xxx] --cfemail [xxx] --cfzone [xxx] --cfkey [xxx] --cfrecord [xxx] --dbrootpass [xxx] 
 <ul>
 <li><b>--dropboxtoken</b> DROPBOX_ACCESS_TOKEN <b>[MANDATORY]</b><br>
-The access token for your dropbox account, refer to http://bit.ly/2it95it to get one<br>
+The access token for your dropbox account, refer to http://bit.ly/2iT95IT to get one<br>
 <li><b>--enckey</b> ENCRYPTION_KEY_FOR_BACKUPS <b>[MANDATORY]</b><br>
 A user supplied decryption key to decrypt backups (all files uploaded to backup dir are encrypted)<br>
 <li><b>--aprestore</b>APACHE Restore Flag <i>[OPTIONAL]</i><br>
