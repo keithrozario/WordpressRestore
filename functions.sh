@@ -110,9 +110,9 @@ DROPBOXPATH=$3
 
 delFile $WPSETTINGSFILE
 
-echo "INFO: WPDIR=$WPDIR" | sudo tee --append $WPSETTINGSFILE > /dev/null
-echo "INFO: WPCONFDIR=$WPCONFDIR" | sudo tee --append $WPSETTINGSFILE > /dev/null
-echo "INFO: DROPBOXPATH=$DROPBOXPATH" | sudo tee --append $WPSETTINGSFILE > /dev/null
+echo "WPDIR=$WPDIR" | sudo tee --append $WPSETTINGSFILE > /dev/null
+echo "WPCONFDIR=$WPCONFDIR" | sudo tee --append $WPSETTINGSFILE > /dev/null
+echo "DROPBOXPATH=$DROPBOXPATH" | sudo tee --append $WPSETTINGSFILE > /dev/null
 
 }
 
