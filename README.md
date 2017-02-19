@@ -7,8 +7,8 @@ Automated script to backup wordpress daily or restore from backup
 2. Dropbox account (to save backups and restore from)<br>
 3. Optional Cloudflare account (with token key) if you wish to update DNS<br>
 4. Account with sudo access on the Ubuntu box you're at<br>
-    4.1 To create non-root Sudo account refer to http://do.co/2fN6VxN
-    4.2 To execute sudo without password prompr refer to http://bit.ly/2lXtmCu
+    4.1 To create non-root Sudo account refer to http://do.co/2fN6VxN<br>
+    4.2 To execute sudo without password prompr refer to http://bit.ly/2lXtmCu<br>
 
 <h2>Assumptions</h2>
 
@@ -71,4 +71,5 @@ The password for root on the database you're about to create, script will genera
 <h2>Special Thanks</h2>
 Thanks to <a href="https://github.com/andreafabrizi">Andrea Fabrizi</a> for the awesome <a href="https://github.com/andreafabrizi/Dropbox-Uploader">DropboxUploader script</a>  <br>
 Thanks to <a href="https://gist.github.com/benkulbertis">Ben Kulbertis</a> for the awesome <a href="https://gist.github.com/benkulbertis/fff10759c2391b6618dd/">Cloudflare update script</a>  <br>
+Thanks to <a href="http://peteris.rocks">Peteris.Rocks</a> for his/her awesome work on the <a href="http://bit.ly/2kf7KQm">Unattended Wordress Install</a>
 
