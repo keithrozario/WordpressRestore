@@ -98,7 +98,7 @@ echo -e "\\n#########    END    #########\\n"
 echo -e "\\n######### Zipping Wordpress BEGIN #########\\n"
 
 echo "INFO: Zipping the $WPDIR to : $BACKUPPATH/$WPZIPFILE"
-tar -czf $BACKUPPATH/$WPZIPFILE -C $WPDIR . #turn off verbose and don't keep directory structure
+sudo tar -czf $BACKUPPATH/$WPZIPFILE -C $WPDIR . #turn off verbose and don't keep directory structure
 echo "INFO: $WPDIR successfully zipped to $BACKUPPATH/$WPZIPFILE"
 
 echo -e "\\n#########    END    #########\\n"
@@ -108,7 +108,7 @@ echo -e "\\n#########    END    #########\\n"
 echo -e "\\n######### Zipping APACHE BEGIN #########\\n"
 
 echo "INFO: Zipping $APACHEDIR"
-tar -czf $BACKUPPATH/$APACHECONFIG -C $APACHEDIR . #turn off verbose and don't keep directory structure
+sudo tar -czf $BACKUPPATH/$APACHECONFIG -C $APACHEDIR . #turn off verbose and don't keep directory structure
 echo "INFO: $APACHEDIR successfully zipped to $BACKUPPATH/$WPZIPFILE"
 
 echo -e "\\n#########    END    #########\\n"
