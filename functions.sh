@@ -97,7 +97,7 @@ if [ -f $ENCKEYFILE ]; then
 else
   echo "GOOD: No $ENCKEYFILE found, looks like this is the first install"
 fi
-echo 'ENCKEY=$ENCKEY' | sudo tee --append $ENCKEYFILE > /dev/null
+echo "ENCKEY=$ENCKEY" | sudo tee --append $ENCKEYFILE > /dev/null
 
 }
 
@@ -113,9 +113,9 @@ DROPBOXPATH=$3
 
 delFile $WPSETTINGSFILE
 
-echo 'INFO: WPDIR=$WPDIR' | sudo tee --append $WPSETTINGSFILE > /dev/null
-echo 'INFO: WPCONFDIR=$WPCONFDIR' | sudo tee --append $WPSETTINGSFILE > /dev/null
-echo 'INFO: DROPBOXPATH=$DROPBOXPATH' | sudo tee --append $WPSETTINGSFILE > /dev/null
+echo "INFO: WPDIR=$WPDIR" | sudo tee --append $WPSETTINGSFILE > /dev/null
+echo "INFO: WPCONFDIR=$WPCONFDIR" | sudo tee --append $WPSETTINGSFILE > /dev/null
+echo "INFO: DROPBOXPATH=$DROPBOXPATH" | sudo tee --append $WPSETTINGSFILE > /dev/null
 
 }
 
