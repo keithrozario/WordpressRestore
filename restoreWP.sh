@@ -376,7 +376,7 @@ if [ $APRESTORE = 1 ]; then
 
 	echo "INFO: Removing configurations file--to prevent conflicts"
 	delDir $APACHEDIR
-	sudo mkdir -p $WPDIR
+	sudo mkdir -p $APACHEDIR
 	sudo tar -xzf $APACHECONFIG -C $APACHEDIR .
 
 else
