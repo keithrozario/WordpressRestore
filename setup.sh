@@ -26,7 +26,7 @@
 FUNCTIONSFILE=functions.sh
 if [ -f $FUNCTIONSFILE ]; then
 	echo "Loading $FUNCTIONSFILE"
-	source "$FUNCTIONSFILE" 2>/dev/null #file exist, load variables
+	source "$FUNCTIONSFILE" #file exist, load variables
 else 
 	echo "Unable to find $FUNCTIONSFILE, please run setup.sh for first time"
     	exit 0
@@ -98,17 +98,11 @@ ENCKEYFILE=$BACKUPSHDIR/.enckey
 GetDropboxUploader $DROPBOXTOKEN #in functions.sh
 
 #---------------------------------------------------------------------------------------
-# Setup .wpsettings file
+# Setup .wpsettings file & .enckey file
 #---------------------------------------------------------------------------------------
-if [ -f "$WPSETTINGSFILE" ]; then
-echo "Deleting old $WPSETTINGSFILE (probably from previous installation)"
-rm $WPSETTINGSFILE
-fi
 
-echo "WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
-echo "WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
-echo "DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
 
+SetWPSettings $WPDIR $WPCONFDIR $DROPBOXPATH
 SetEncKey $ENCKEY #in functions.sh
 
 #---------------------------------------------------------------------------------------
