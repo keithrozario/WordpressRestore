@@ -6,13 +6,15 @@ Automated script to backup wordpress daily or restore from backup
 1. Wordpress site (to backup and restore)<br>
 2. Dropbox account (to save backups and restore from)<br>
 3. Optional Cloudflare account (with token key) if you wish to update DNS<br>
-4. Root access to box you wish to restore to (backup doesn't require root access)<br>
+4. Account with sudo access on the Ubuntu box you're at<br>
+    4.1 To create non-root Sudo account refer to http://do.co/2fN6VxN
+    4.2 To execute sudo without password prompr refer to http://bit.ly/2lXtmCu
 
 <h2>Assumptions</h2>
 
-1. Wordpress site is stored on Ubuntu 16.04 or 16.10 (only tested versions) <br>
+1. Wordpress site is stored on Ubuntu 16.04 (only tested versions, both on AWS and DigitalOcean) <br>
 2. Database is MYSQL and running on the same machine (localhost) <br>
-3. Apache config files are ALL in /etc/apache2--no certs stored elsewhere <br>
+3. Apache config files are ALL in /etc/apache2--no certs stored elsewhere <b>except</b> /etc/Letsencrypt <br>
 
 <h2>To Backup Wordpress:</h2>
 git clone https://github.com/keithrozario/WordpressRestore/ <br>
