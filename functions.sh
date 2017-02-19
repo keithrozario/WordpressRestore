@@ -97,9 +97,8 @@ if [ -f $ENCKEYFILE ]; then
 else
   echo "GOOD: No $ENCKEYFILE found, looks like this is the first install"
 fi
+echo 'ENCKEY=$ENCKEY' | sudo tee --append $ENCKEYFILE > /dev/null
 
-
-sudo echo "ENCKEY=$ENCKEY" > $ENCKEYFILE #store wpconfigpass in config file
 }
 
 #---------------------------------------------------------------------------------------
@@ -112,14 +111,11 @@ WPDIR=$1
 WPCONFDIR=$2
 DROPBOXPATH=$3
 
-if [ -f $WPSETTINGSFILE ]; then
-	echo "WARNING: Older $WPSETTINGSFILE detected, deleting it" 
-	sudo rm $WPSETTINGSFILE
-else 
-	echo "GOOD: no $WPSETTINGSFILE found --- creating one"
-  	sudo echo "INFO: WPDIR=$WPDIR" >> $WPSETTINGSFILE #store wordpress directory in config file
-  	sudo echo "INFO: WPCONFDIR=$WPCONFDIR" >> $WPSETTINGSFILE #store wordpress config (wp-config.php) directory in config file
-  	sudo echo "INFO: DROPBOXPATH=$DROPBOXPATH" >> $WPSETTINGSFILE #store dropbox uploader path in directory
-fi
+delFile $WPSETTINGSFILE
+
+echo 'INFO: WPDIR=$WPDIR' | sudo tee --append $WPSETTINGSFILE > /dev/null
+echo 'INFO: WPCONFDIR=$WPCONFDIR' | sudo tee --append $WPSETTINGSFILE > /dev/null
+echo 'INFO: DROPBOXPATH=$DROPBOXPATH' | sudo tee --append $WPSETTINGSFILE > /dev/null
+
 }
 
