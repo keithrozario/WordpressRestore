@@ -24,7 +24,7 @@ ENCKEYFILE=/var/.enckey
 echo -e "\\n######### Checking for .wpsettings and enckey BEGIN #########\\n"
 
 if [ -f $WPSETTINGSFILE ]; then
-    source "$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
+    source "$WPSETTINGSFILE" #file exist, load variables
     echo "GOOD: .wpsettings file found"
 else 
     echo "ERROR: Unable to find $WPSETTINGSFILE, please run setup.sh for first time"
@@ -32,7 +32,7 @@ else
 fi
 
 if [ -f $ENCKEYFILE ]; then
-    source "$ENCKEYFILE" 2>/dev/null #file exist, load variables
+    source "$ENCKEYFILE" #file exist, load variables
     echo "GOOD: .enckey found"
 else 
     echo "ERROR: Unable to find $ENCKEYFILE, please run setup.sh for first time"
@@ -65,11 +65,11 @@ LETSENCRYPTDIR=/etc/letsencrypt
 echo -e "\\n######### Creating Backup Path BEGIN #########\\n"
 if [ -d $BACKUPPATH ]; then
     echo "WARNING: Removing older version of $BACKUPPATH"
-    rm -r $BACKUPPATH #remove current directory (to avoid conflicts)
-    mkdir $BACKUPPATH
+    sudo rm -r $BACKUPPATH #remove current directory (to avoid conflicts)
+    sudo mkdir $BACKUPPATH
 else 
-    echo "$BACKUPPATH not found, creating path"
-    mkdir $BACKUPPATH
+    echo "GOOD: $BACKUPPATH not found, creating path"
+    sudo mkdir $BACKUPPATH
 fi
 echo -e "\\n#########    END    #########\\n"
 #-------------------------------------------------------------------------
@@ -86,7 +86,7 @@ if [ -z $WPDBNAME ]; then
     exit 0
 else
     echo "INFO: Dumping MYSQL Files"
-    mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME > $BACKUPPATH/$WPSQLFILE
+    mysqldump -u $WPDBUSER -p$WPDBPASS $WPDBNAME | sudo tee $BACKUPPATH/$WPSQLFILE > /dev/null
     echo "GOOD: MYSQL successfully backed up to $BACKUPPATH/$WPSQLFILE"
 fi
 
@@ -119,28 +119,28 @@ echo -e "\\n#########    END    #########\\n"
 echo -e "\\n######### Encrypting files BEGIN #########\\n"
 
 echo -e "INFO: Encrypting MYSQL FIles"
-openssl enc -aes-256-cbc -in $BACKUPPATH/$WPSQLFILE -out $BACKUPPATH/$WPSQLFILE.enc -k $ENCKEY
-rm $BACKUPPATH/$WPSQLFILE #remove unencrypted file
+sudo openssl enc -aes-256-cbc -in $BACKUPPATH/$WPSQLFILE -out $BACKUPPATH/$WPSQLFILE.enc -k $ENCKEY
+sudo rm $BACKUPPATH/$WPSQLFILE #remove unencrypted file
 
 echo -e "INFO: Encrypting Wordpress Backup file:"
-openssl enc -aes-256-cbc -in $BACKUPPATH/$WPZIPFILE -out $BACKUPPATH/$WPZIPFILE.enc -k $ENCKEY
-rm $BACKUPPATH/$WPZIPFILE #remove unencrypted file
+sudo openssl enc -aes-256-cbc -in $BACKUPPATH/$WPZIPFILE -out $BACKUPPATH/$WPZIPFILE.enc -k $ENCKEY
+sudo rm $BACKUPPATH/$WPZIPFILE #remove unencrypted file
 
 echo -e "INFO: Encrypting Apache Configuration"
-openssl enc -aes-256-cbc -in $BACKUPPATH/$APACHECONFIG -out $BACKUPPATH/$APACHECONFIG.enc -k $ENCKEY
-rm $BACKUPPATH/$APACHECONFIG #remove unencrypted file
+sudo openssl enc -aes-256-cbc -in $BACKUPPATH/$APACHECONFIG -out $BACKUPPATH/$APACHECONFIG.enc -k $ENCKEY
+sudo rm $BACKUPPATH/$APACHECONFIG #remove unencrypted file
 
 
 
 # Encrypt wp-config.php file
 if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
     echo "INFO: Encrypting wp-config.php file in $WPCONFDIR"   
-    openssl enc -aes-256-cbc -in $WPCONFDIR/$WPCONFIGFILE -out $BACKUPPATH/$WPCONFIGFILE.enc -k $ENCKEY
+    sudo openssl enc -aes-256-cbc -in $WPCONFDIR/$WPCONFIGFILE -out $BACKUPPATH/$WPCONFIGFILE.enc -k $ENCKEY
 else
     echo "INFO: wp-config.php file is in the wordpress directory, no separate zipping necessary"
 fi
 
-openssl enc -aes-256-cbc -in $WPSETTINGSFILE -out $BACKUPPATH/$WPSETTINGSFILENAME.enc -k $ENCKEY
+sudo openssl enc -aes-256-cbc -in $WPSETTINGSFILE -out $BACKUPPATH/$WPSETTINGSFILENAME.enc -k $ENCKEY
 echo -e "WARNING: The encryption key in $ENCKEYFILE will not be uploaded to Dropbox"
 echo -e "WARNING: Store $ENCKEYFILE in a safe place"
 
@@ -152,13 +152,13 @@ echo -e "\\n#########    END    #########\\n"
 echo -e "\\n######### Upload to Dropbox BEGIN #########\\n"
 
 echo -e "INFO: Uploading Files to Dropbox"
-$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSQLFILE.enc /
-$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPZIPFILE.enc /
-$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG.enc /
+sudo $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSQLFILE.enc /
+sudo $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPZIPFILE.enc /
+sudo $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$APACHECONFIG.enc /
 if [ "$WPCONFDIR" != "$WPDIR" ]; then #already copied, don't proceed
-    $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILE.enc /
+    sudo $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPCONFIGFILE.enc /
 fi
-$DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSETTINGSFILENAME.enc /
+sudo $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$WPSETTINGSFILENAME.enc /
 
 echo -e "\\n#########    END    #########\\n"
 
@@ -168,12 +168,12 @@ echo -e "\\n#########    END    #########\\n"
 echo -e "\\n######### LetsEncrypt BEGIN #########\\n"
 if [ -d $LETSENCRYPTDIR ]; then
     echo -e "INFO: LetsEncrypt detected, backing up files"
-    tar -czf $BACKUPPATH/$LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
+    sudo tar -czf $BACKUPPATH/$LETSENCRYPTCONFIG -C $LETSENCRYPTDIR .
     echo -e "INFO: Encrypting Letsencrypt Configuration"
-    openssl enc -aes-256-cbc -in $BACKUPPATH/$LETSENCRYPTCONFIG -out $BACKUPPATH/$LETSENCRYPTCONFIG.enc -k $ENCKEY
-    rm $BACKUPPATH/$LETSENCRYPTCONFIG #remove unencrypted file
+    sudo openssl enc -aes-256-cbc -in $BACKUPPATH/$LETSENCRYPTCONFIG -out $BACKUPPATH/$LETSENCRYPTCONFIG.enc -k $ENCKEY
+    sudo rm $BACKUPPATH/$LETSENCRYPTCONFIG #remove unencrypted file
     echo -e "INFO: Uploading Letsencrypt to Dropbox"
-    $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$LETSENCRYPTCONFIG.enc /
+    sudo $DROPBOXPATH/dropbox_uploader.sh upload $BACKUPPATH/$LETSENCRYPTCONFIG.enc /
 else
     echo -e "LetsEncrypt not found"
 fi
