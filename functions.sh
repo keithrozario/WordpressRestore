@@ -103,7 +103,7 @@ echo "ENCKEY=$ENCKEY" | sudo tee --append $ENCKEYFILE > /dev/null
 #---------------------------------------------------------------------------------------
 
 function SetWPSettings {
-WPSETTINGSFILE = /var/.wpsettings
+WPSETTINGSFILE=/var/.wpsettings
 WPDIR=$1
 WPCONFDIR=$2
 DROPBOXPATH=$3
