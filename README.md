@@ -36,10 +36,10 @@ Directory of the Wordpress wp-config.php file, defaults to Wordpress Directory i
 </i><br>
 
 <h2>To Restore Wordpress:</h2>
-git clone https://github.com/keithrozario/WordpressRestore/ <br>
+<code>git clone https://github.com/keithrozario/WordpressRestore/ <br>
 cd WordpressRestore <br>
 chmod +x *.sh <br><br>
-./restoreWP.sh --dropboxtoken [xxx] --enckey [xxxx] --aprestore [x] --domain [xxx] --cfemail [xxx] --cfzone [xxx] --cfkey [xxx] --cfrecord [xxx] --dbrootpass [xxx] 
+./restoreWP.sh --dropboxtoken [xxx] --enckey [xxxx] --aprestore [x] --domain [xxx] --cfemail [xxx] --cfzone [xxx] --cfkey [xxx] --cfrecord [xxx] --dbrootpass [xxx] </code>
 <ul>
 <li><b>--dropboxtoken</b> DROPBOX_ACCESS_TOKEN <b>[MANDATORY]</b><br>
 The access token for your dropbox account, refer to http://bit.ly/2iT95IT to get one<br>
