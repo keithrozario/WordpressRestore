@@ -19,8 +19,8 @@ Automated script to backup wordpress daily or restore from backup
 <h2>To Backup Wordpress:</h2>
 git clone https://github.com/keithrozario/WordpressRestore/ <br>
 cd WordpressRestore <br>
-chmod +x *.sh <br><br>
-./setup.sh --dropboxtoken [xxx] --enckey [xxx] --wpdir [xxx] --wpconfdir [xxx] <br>
+chmod +x *.sh <br>
+./setup.sh --dropboxtoken [xxx] --enckey [xxx] --wpdir [xxx] --wpconfdir [xxx] <br><br>
 <ul>
 <li><b>--dropboxtoken</b> DROPBOX ACCESS TOKEN <b>[MANDATORY]</b><br>
 The access token for your dropbox account, refer to http://bit.ly/2iT95IT to get one<br>
@@ -36,10 +36,10 @@ Directory of the Wordpress wp-config.php file, defaults to Wordpress Directory i
 </i><br>
 
 <h2>To Restore Wordpress:</h2>
-<code>git clone https://github.com/keithrozario/WordpressRestore/ <br>
+git clone https://github.com/keithrozario/WordpressRestore/ <br>
 cd WordpressRestore <br>
-chmod +x *.sh <br><br>
-./restoreWP.sh --dropboxtoken [xxx] --enckey [xxxx] --aprestore [x] --domain [xxx] --cfemail [xxx] --cfzone [xxx] --cfkey [xxx] --cfrecord [xxx] --dbrootpass [xxx] </code>
+chmod +x *.sh <br>
+./restoreWP.sh --dropboxtoken [xxx] --enckey [xxxx] --aprestore [x] --domain [xxx] --cfemail [xxx] --cfzone [xxx] --cfkey [xxx] --cfrecord [xxx] --dbrootpass [xxx]<br><br>
 <ul>
 <li><b>--dropboxtoken</b> DROPBOX_ACCESS_TOKEN <b>[MANDATORY]</b><br>
 The access token for your dropbox account, refer to http://bit.ly/2iT95IT to get one<br>
