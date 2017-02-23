@@ -1,7 +1,0 @@
-1. Currently only works as root (restoreWP.sh), need to modify Database section to allow non-root execute (with sudo privs)
-2. Does not include lets encrypt restore --  do we really need this? Letsencrypt needs DNS resolution, there could be value copying over
-3. ufw isn't strictly idempotent--need to delete all existing rules first, before enabling new ones.
-
-[side note] wp-login.php forces to ssl (in wp-login.php script itself)--you'll need to enable ssl if you want to logon
-
-Almost there--as always! :)
