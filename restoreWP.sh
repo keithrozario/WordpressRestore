@@ -392,8 +392,7 @@ else
 	sudo sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
 	sudo sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
 	sudo sed -i "/DocumentRoot*/a<Directory $WPDIR>\nAllowOverride All\nOrder allow,deny\nallow from all\n</Directory>" $SITESAVAILABLEDIR/$DOMAIN.conf
-	sudo sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
-	
+		
 	#Format $DOMAIN.conf file
 	sudo sed -i "s|\(^ServerName*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
 	sudo sed -i "s|\(^ServerAlias*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
@@ -478,10 +477,10 @@ else
 	
 	if [ $PRODCERT = 1 ]; then
 		echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
-		sudo letsencrypt --apache 
+		sudo letsencrypt --apache --redirect 
 	else
 		echo "Obtaining staging certs (for test)"
-		sudo letsencrypt --apache --staging
+		sudo letsencrypt --apache --redirect --staging
 	fi
 fi
 echo -e "\\n\\n######### Let's encrypt COMPLETE #########\\n\\n"
