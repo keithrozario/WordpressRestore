@@ -91,11 +91,12 @@ BACKUPSHDIR=/var
 BACKUPSHNAME=backupWP.sh
 WPSETTINGSFILE=$BACKUPSHDIR/.wpsettings
 ENCKEYFILE=$BACKUPSHDIR/.enckey
+DROPBOXPATH=/var/Dropbox-Uploader
 
 #---------------------------------------------------------------------------------------
 # Download DropboxUploader and Setup
 #---------------------------------------------------------------------------------------
-GetDropboxUploader $DROPBOXTOKEN #in functions.sh
+GetDropboxUploader $DROPBOXTOKEN $DROPBOXPATH #in functions.sh
 
 #---------------------------------------------------------------------------------------
 # Setup .wpsettings file & .enckey file
