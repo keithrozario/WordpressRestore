@@ -153,6 +153,7 @@ WPSETTINGSFILE=.wpsettings
 WPSETTINGSFILEDIR=/var
 
 SCRIPTDROPBOXPATH=/var/Dropbox-Uploader
+DROPBOXSCRIPT=dropbox_uploader.sh
 
 APACHECONFIG=apachecfg.tar
 APACHEDIR=/etc/apache2
@@ -219,7 +220,7 @@ echo -e "\\n\\n######### REPO UPDATE COMPLETE #########\\n\\n"
 #---------------------------------------------------------------------------------------
 echo -e "\\n\\n######### Downloading from Dropbox #########\\n\\n"
 
-GetDropboxUploader $DROPBOXTOKEN $DROPBOXPATH #in functions.sh
+GetDropboxUploader $DROPBOXTOKEN $SCRIPTDROPBOXPATH #in functions.sh
 
 #---------------------------------------------------------------------------------------
 #Download .wpsettings file
@@ -228,7 +229,7 @@ delFile $WPSETTINGSFILE #remove old wpsettings file (if exists)--functions.sh
 delFile $WPSETTINGSFILEDIR/$WPSETTINGSFILE
 
 echo "INFO: Checking if $WPSETTINGSFILE exist on Dropbox"
-sudo $SCRIPTDROPBOXPATH/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$WPSETTINGSFILE.enc #wpsettings file
 
 if [ -f $WPSETTINGSFILE.enc ]; then
 	echo "GOOD: $WPSETTINGSFILE exist, decrypting and loading"
@@ -252,19 +253,19 @@ delFile $LETSENCRYPTCONFIG
 delFile $WPCONFIGFILE
 
 echo "INFO: Downloading and decrypting SQL backup file"
-sudo $SCRIPTDROPBOXPATH/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$WPSQLFILE.enc #Wordpress.sql file
 sudo openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY 
 
 echo "INFO: Downloading and decrypting Wordpress zip file"
-sudo $SCRIPTDROPBOXPATH/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$WPZIPFILE.enc #zip file with all wordpress contents
 sudo openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
 echo "INFO: Downloading and decrypting Apache configuration"
-sudo $SCRIPTDROPBOXPATH/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$APACHECONFIG.enc #zip file with all wordpress contents
 sudo openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
 
 echo "INFO: Downloading and decrypting LetsEncrypt configuration"
-sudo $SCRIPTDROPBOXPATH/dropbox_uploader.sh download /$LETSENCRYPTCONFIG.enc #zip file with all wordpress contents
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$LETSENCRYPTCONFIG.enc #zip file with all wordpress contents
 if [ -f $LETSENCRYPTCONFIG.enc ]; then
 	sudo openssl enc -aes-256-cbc -d -in $LETSENCRYPTCONFIG.enc -out $LETSENCRYPTCONFIG -k $ENCKEY
 else
@@ -275,7 +276,7 @@ if [ "$WPDIR" = "$WPCONFDIR" ]; then
 	echo "INFO: wp-config is in $WPZIPFILE, no further downloads required"
 else
 	echo "INFO: wp-config is a separate file, downloading $WPCONFIGFILE from Dropbox"
-	sudo $SCRIPTDROPBOXPATH/dropbox_uploader.sh download /$WPCONFIGFILE.enc #encrypted Wp-config.php file
+	sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$WPCONFIGFILE.enc #encrypted Wp-config.php file
 	sudo openssl enc -aes-256-cbc -d -in $WPCONFIGFILE.enc -out $WPCONFIGFILE -k $ENCKEY
 fi
 
