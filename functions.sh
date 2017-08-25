@@ -44,11 +44,12 @@ fi
 #---------------------------------------------------------------------------------------
 function GetDropboxUploader {
 
-DROPBOXTOKEN=$1 #passing argument
+DROPBOXTOKEN=$1
+DROPBOXPATH=$2
 
 DROPBOXUPLOADERFILE=~/.dropbox_uploader
 URLDROPBOXDOWNLOADER="https://github.com/andreafabrizi/Dropbox-Uploader.git" #Github for Dropbox Uploader
-DROPBOXPATH=/var/Dropbox-Uploader
+
 
 delDir $DROPBOXPATH
 delFile $DROPBOXUPLOADERFILE 

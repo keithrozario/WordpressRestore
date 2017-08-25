@@ -152,7 +152,8 @@ WPCONFIGFILE=wp-config.php
 WPSETTINGSFILE=.wpsettings
 WPSETTINGSFILEDIR=/var
 
-DEFAULTDROPBOXPATH=/var/Dropbox-Uploader
+SCRIPTDROPBOXPATH=/var/Dropbox-Uploader
+DROPBOXSCRIPT=dropbox_uploader.sh
 
 APACHECONFIG=apachecfg.tar
 APACHEDIR=/etc/apache2
@@ -219,27 +220,28 @@ echo -e "\\n\\n######### REPO UPDATE COMPLETE #########\\n\\n"
 #---------------------------------------------------------------------------------------
 echo -e "\\n\\n######### Downloading from Dropbox #########\\n\\n"
 
-GetDropboxUploader $DROPBOXTOKEN #in functions.sh
+GetDropboxUploader $DROPBOXTOKEN $SCRIPTDROPBOXPATH #in functions.sh
 
 #---------------------------------------------------------------------------------------
 #Download .wpsettings file
 #---------------------------------------------------------------------------------------
-delFile $WPSETTINGSFILE
-delFile $WPSETTINGSFILEDIR/$WPSETTINGSFILE #remove old wpsettings file (if exists)--functions.sh
+delFile $WPSETTINGSFILE #remove old wpsettings file (if exists)--functions.sh
+delFile $WPSETTINGSFILEDIR/$WPSETTINGSFILE
 
 echo "INFO: Checking if $WPSETTINGSFILE exist on Dropbox"
-sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSETTINGSFILE.enc #wpsettings file
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$WPSETTINGSFILE.enc #wpsettings file
 
 if [ -f $WPSETTINGSFILE.enc ]; then
 	echo "GOOD: $WPSETTINGSFILE exist, decrypting and loading"
-	sudo openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILEDIR/$WPSETTINGSFILE -k $ENCKEY 
+	sudo openssl enc -aes-256-cbc -d -in $WPSETTINGSFILE.enc -out $WPSETTINGSFILE -k $ENCKEY 
 	echo "INFO: Loading $WPSETTINGSFILE"
-	source "$WPSETTINGSFILEDIR/$WPSETTINGSFILE" 2>/dev/null #file exist, load variables
+	source "$WPSETTINGSFILE" #file exist, load variables into this script
+	echo "INFO: Creating new $WPSETTINGSFILE in $WPSETTINGSFILEDIR"
+	SetWPSettings $WPDIR $WPCONFDIR $SCRIPTDROPBOXPATH #create new .wpsettings file
 else 
 	echo "ERROR: unable to find $WPSETTINGSFILE, check dropbox location to see if the file exists"
 	exit 0
 fi
-
 
 #---------------------------------------------------------------------------------------
 #Download files from dropbox
@@ -251,19 +253,19 @@ delFile $LETSENCRYPTCONFIG
 delFile $WPCONFIGFILE
 
 echo "INFO: Downloading and decrypting SQL backup file"
-sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPSQLFILE.enc #Wordpress.sql file
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$WPSQLFILE.enc #Wordpress.sql file
 sudo openssl enc -aes-256-cbc -d -in $WPSQLFILE.enc -out $WPSQLFILE -k $ENCKEY 
 
 echo "INFO: Downloading and decrypting Wordpress zip file"
-sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPZIPFILE.enc #zip file with all wordpress contents
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$WPZIPFILE.enc #zip file with all wordpress contents
 sudo openssl enc -aes-256-cbc -d -in $WPZIPFILE.enc -out $WPZIPFILE -k $ENCKEY
 
 echo "INFO: Downloading and decrypting Apache configuration"
-sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$APACHECONFIG.enc #zip file with all wordpress contents
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$APACHECONFIG.enc #zip file with all wordpress contents
 sudo openssl enc -aes-256-cbc -d -in $APACHECONFIG.enc -out $APACHECONFIG -k $ENCKEY
 
 echo "INFO: Downloading and decrypting LetsEncrypt configuration"
-sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$LETSENCRYPTCONFIG.enc #zip file with all wordpress contents
+sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$LETSENCRYPTCONFIG.enc #zip file with all wordpress contents
 if [ -f $LETSENCRYPTCONFIG.enc ]; then
 	sudo openssl enc -aes-256-cbc -d -in $LETSENCRYPTCONFIG.enc -out $LETSENCRYPTCONFIG -k $ENCKEY
 else
@@ -274,7 +276,7 @@ if [ "$WPDIR" = "$WPCONFDIR" ]; then
 	echo "INFO: wp-config is in $WPZIPFILE, no further downloads required"
 else
 	echo "INFO: wp-config is a separate file, downloading $WPCONFIGFILE from Dropbox"
-	sudo /var/Dropbox-Uploader/dropbox_uploader.sh download /$WPCONFIGFILE.enc #encrypted Wp-config.php file
+	sudo $SCRIPTDROPBOXPATH/$DROPBOXSCRIPT download /$WPCONFIGFILE.enc #encrypted Wp-config.php file
 	sudo openssl enc -aes-256-cbc -d -in $WPCONFIGFILE.enc -out $WPCONFIGFILE -k $ENCKEY
 fi
 
@@ -391,8 +393,7 @@ else
 	sudo sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
 	sudo sed -i "s|\("DocumentRoot" * *\).*|\1$WPDIR|" $SITESAVAILABLEDIR/$DOMAIN.conf #change DocumentRoot to $WPDIR
 	sudo sed -i "/DocumentRoot*/a<Directory $WPDIR>\nAllowOverride All\nOrder allow,deny\nallow from all\n</Directory>" $SITESAVAILABLEDIR/$DOMAIN.conf
-	sudo sed -i "/ServerAdmin*/aServerAlias $DOMAIN" $SITESAVAILABLEDIR/$DOMAIN.conf #insert ServerAlias setting
-	
+		
 	#Format $DOMAIN.conf file
 	sudo sed -i "s|\(^ServerName*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
 	sudo sed -i "s|\(^ServerAlias*\)|$EIGHTSPACES\1|" $SITESAVAILABLEDIR/$DOMAIN.conf #tab-ing
@@ -477,10 +478,10 @@ else
 	
 	if [ $PRODCERT = 1 ]; then
 		echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
-		sudo letsencrypt --apache 
+		sudo letsencrypt --apache --redirect 
 	else
 		echo "Obtaining staging certs (for test)"
-		sudo letsencrypt --apache --staging
+		sudo letsencrypt --apache --redirect --staging
 	fi
 fi
 echo -e "\\n\\n######### Let's encrypt COMPLETE #########\\n\\n"
