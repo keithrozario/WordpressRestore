@@ -448,9 +448,12 @@ echo -e "\\n\\n######### CRON jobs, firewall and swap file COMPLETE #########\\n
 # Lets encrypt
 #---------------------------------------------------------------------------------------
 echo -e "\\n\\n######### Let's encrypt #########\\n\\n"
-#Future Feature to ping $Domain and check if IP=this machine, only then proceed
-#While possible to do this automatically, I prefer to use letsencrypt supported script
-sudo apt-get -y install python-letsencrypt-apache >>$LOGFILE
+
+sudo apt-get update
+sudo apt-get install software-properties-common >>$LOGFILE
+sudo add-apt-repository ppa:certbot/certbot -y >>$LOGFILE
+sudo apt-get update
+sudo apt-get install python-certbot-apache >>$LOGFILE
 
 if [ -z "$PRODCERT" ]; then #Check for prodcert
 	if [ $APRESTORE = 1 ]; then
@@ -473,17 +476,23 @@ if [ -z "$PRODCERT" ]; then #Check for prodcert
 else
 	echo -e "\\n\\n######### Getting Certs #########"
 	
-	( crontab -l ; echo "0 6 * * * letsencrypt renew" ) | crontab -
-	( crontab -l ; echo "0 23 * * * letsencrypt renew" ) | crontab -
+	( crontab -l ; echo "0 6 * * * certbot renew" ) | crontab -
+	( crontab -l ; echo "0 23 * * * certbot renew" ) | crontab -
 	
 	if [ $PRODCERT = 1 ]; then
 		echo "WARNING: Obtaining production certs, these are rate-limited so be sure this is a Production server"
-		sudo letsencrypt --apache --redirect 
+		sudo certbot --authenticator webroot --installer apache 
+		
+		echo -e "\\n\\n######### Testing Cert Renewal #########"
+		sudo certbot renew --dry-run >>$LOGFILE
 	else
 		echo "Obtaining staging certs (for test)"
-		sudo letsencrypt --apache --redirect --staging
+		sudo certbot --authenticator webroot --installer apache --staging
 	fi
 fi
+
+
+
 echo -e "\\n\\n######### Let's encrypt COMPLETE #########\\n\\n"
 #---------------------------------------------------------------------------------------
 # All Done
