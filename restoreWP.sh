@@ -484,10 +484,10 @@ else
 		sudo certbot --authenticator webroot --installer apache 
 		
 		echo -e "\\n\\n######### Testing Cert Renewal #########"
-		sudo certbot renew --dry-run >>$LOGFILE
+		sudo certbot renew --dry-run 
 	else
 		echo "Obtaining staging certs (for test)"
-		sudo certbot --authenticator webroot --installer apache --staging >>$LOGFILE
+		sudo certbot --authenticator webroot --installer apache --staging 
 	fi
 fi
 
