@@ -453,7 +453,7 @@ sudo apt-get update
 sudo apt-get install software-properties-common >>$LOGFILE
 sudo add-apt-repository ppa:certbot/certbot -y >>$LOGFILE
 sudo apt-get update
-sudo apt-get install python-certbot-apache >>$LOGFILE
+sudo apt-get -y install python-certbot-apache >>$LOGFILE
 
 if [ -z "$PRODCERT" ]; then #Check for prodcert
 	if [ $APRESTORE = 1 ]; then
